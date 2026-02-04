@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>MSB3277</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="RcsPointStyleLayerSync.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv2.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv3.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv5.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv6_layer0_patch.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv7_robust_forceall_csv.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv82_layer_resolver.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv83_fix_style_names.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv85_plan_primary.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv87_uses_direct_setters.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv88_all_views.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv89_no_getset.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv8_diag_more.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv8_secondary_match.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv90_direct_only.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv90_direct_only_PATCHED.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv90_gem.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv93.cs" />
+    <Compile Remove="RcsPointStyleLayerSyncv94_LAYERSETTER_DIAG.cs" />
+    <Compile Remove="RCS_DeleteAllPointStyles_NET8.cs" />
+    <Compile Remove="RCS_Export_Delete_Import.cs" />
+    <Compile Remove="RCS_Export_Delete_Import_PATCH_NET8_FALLBACK0_v4.cs" />
+    <Compile Remove="RCS_PointStyle_ExportDeleteImport_MERGED.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="accoremgd">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2025\accoremgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Acdbmgd">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2025\acdbmgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>   
+    <Reference Include="AecBaseMgd">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2025\ACA\AecBaseMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>    
+    <Reference Include="AeccDbMgd">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2025\C3D\AeccDbMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>   
+    <Reference Include="AeccLogMgd">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2025\C3D\AeccLogMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AeccUiMgd">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2025\C3D\AeccUiMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference> 
+  </ItemGroup>
+
+</Project>
