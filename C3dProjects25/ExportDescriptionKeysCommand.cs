@@ -6,10 +6,8 @@ using Autodesk.Civil.ApplicationServices;
 using Autodesk.Civil.DatabaseServices;
 using Autodesk.Civil.DatabaseServices.Styles;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using AcApp = Autodesk.AutoCAD.ApplicationServices.Core.Application;
@@ -50,61 +48,59 @@ namespace RcsTools
 
                 using (Transaction tr = db.TransactionManager.StartTransaction())
                 {
-                    object keySetCollection = PointDescriptionKeySetCollection.GetPointDescriptionKeySets(db);
+                    PointDescriptionKeySetCollection keySets =
+                        PointDescriptionKeySetCollection.GetPointDescriptionKeySets(db);
 
-                    if (keySetCollection == null)
+                    if (keySets == null || keySets.Count == 0)
                     {
-                        ed.WriteMessage("\nCould not access description key sets from the active drawing database.");
+                        ed.WriteMessage("\nNo description key sets were found in this drawing.");
                         return;
                     }
 
-                    foreach (object keySetItem in EnumerateUnknownCollection(keySetCollection))
+                    foreach (ObjectId keySetId in keySets)
                     {
-                        ObjectId keySetId = ToObjectId(keySetItem);
                         if (keySetId == ObjectId.Null || keySetId.IsErased)
                             continue;
 
-                        DBObject keySetObj = tr.GetObject(keySetId, OpenMode.ForRead, false);
-                        if (keySetObj == null)
+                        PointDescriptionKeySet keySet =
+                            tr.GetObject(keySetId, OpenMode.ForRead, false) as PointDescriptionKeySet;
+
+                        if (keySet == null)
                             continue;
 
-                        string keySetName = SafeString(GetPropertyValue(keySetObj, "Name"));
-                        if (string.IsNullOrWhiteSpace(keySetName))
-                            keySetName = "<UnnamedKeySet>";
+                        string keySetName = string.IsNullOrWhiteSpace(keySet.Name)
+                            ? "<UnnamedKeySet>"
+                            : keySet.Name;
 
-                        object keysObj = GetPropertyValue(keySetObj, "DescriptionKeys");
-                        if (keysObj == null)
-                            keysObj = GetPropertyValue(keySetObj, "Keys");
-                        if (keysObj == null)
-                            keysObj = GetPropertyValue(keySetObj, "Items");
-
-                        if (keysObj == null)
+                        ObjectIdCollection keyIds = keySet.GetPointDescriptionKeyIds();
+                        if (keyIds == null || keyIds.Count == 0)
                             continue;
 
-                        foreach (object keyItem in EnumerateUnknownCollection(keysObj))
+                        foreach (ObjectId keyId in keyIds)
                         {
-                            object descKeyObj = TryOpenDbObjectOrReturnRaw(tr, keyItem);
-                            if (descKeyObj == null)
+                            if (keyId == ObjectId.Null || keyId.IsErased)
                                 continue;
 
-                            string code = SafeString(GetPropertyValue(descKeyObj, "Code"));
+                            PointDescriptionKey key =
+                                tr.GetObject(keyId, OpenMode.ForRead, false) as PointDescriptionKey;
+
+                            if (key == null)
+                                continue;
+
+                            string code = SafeString(key.Code);
                             if (string.IsNullOrWhiteSpace(code))
-                                code = SafeString(GetPropertyValue(descKeyObj, "Name"));
-                            if (string.IsNullOrWhiteSpace(code))
-                                code = SafeString(GetPropertyValue(descKeyObj, "RawDesc"));
+                                code = SafeString(key.DisplayName);
 
                             string pointStyleName = string.Empty;
                             string blockName = string.Empty;
 
-                            // Autodesk docs use StyleId on PointDescriptionKey
-                            ObjectId pointStyleId = GetObjectIdProperty(descKeyObj, "StyleId");
-                            if (pointStyleId == ObjectId.Null)
-                                pointStyleId = GetObjectIdProperty(descKeyObj, "PointStyleId");
-
+                            ObjectId pointStyleId = key.StyleId;
                             if (pointStyleId != ObjectId.Null && !pointStyleId.IsErased)
                             {
-                                DBObject psObj = tr.GetObject(pointStyleId, OpenMode.ForRead, false);
-                                if (psObj is PointStyle pointStyle)
+                                PointStyle pointStyle =
+                                    tr.GetObject(pointStyleId, OpenMode.ForRead, false) as PointStyle;
+
+                                if (pointStyle != null)
                                 {
                                     pointStyleName = SafeString(pointStyle.Name);
                                     blockName = TryGetPointStyleBlockName(pointStyle);
@@ -125,22 +121,6 @@ namespace RcsTools
             catch (System.Exception ex)
             {
                 ed.WriteMessage($"\nError: {ex.Message}\n{ex.StackTrace}");
-            }
-        }
-
-        private static object TryOpenDbObjectOrReturnRaw(Transaction tr, object item)
-        {
-            try
-            {
-                ObjectId id = ToObjectId(item);
-                if (id != ObjectId.Null && !id.IsErased)
-                    return tr.GetObject(id, OpenMode.ForRead, false);
-
-                return item;
-            }
-            catch
-            {
-                return null;
             }
         }
 
@@ -203,57 +183,6 @@ namespace RcsTools
             return string.Empty;
         }
 
-        private static IEnumerable<object> EnumerateUnknownCollection(object collection)
-        {
-            if (collection == null)
-                yield break;
-
-            if (collection is IEnumerable enumerable)
-            {
-                foreach (object item in enumerable)
-                    yield return item;
-
-                yield break;
-            }
-
-            object countObj = GetPropertyValue(collection, "Count");
-            if (countObj is int count)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    object item = GetIndexedValue(collection, i);
-                    if (item != null)
-                        yield return item;
-                }
-            }
-        }
-
-        private static object GetIndexedValue(object obj, int index)
-        {
-            try
-            {
-                PropertyInfo indexer = obj.GetType()
-                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .FirstOrDefault(p =>
-                    {
-                        ParameterInfo[] idx = p.GetIndexParameters();
-                        return idx.Length == 1 && idx[0].ParameterType == typeof(int);
-                    });
-
-                if (indexer != null)
-                    return indexer.GetValue(obj, new object[] { index });
-
-                MethodInfo itemMethod = obj.GetType().GetMethod("Item", new[] { typeof(int) });
-                if (itemMethod != null)
-                    return itemMethod.Invoke(obj, new object[] { index });
-            }
-            catch
-            {
-            }
-
-            return null;
-        }
-
         private static object GetPropertyValue(object obj, string propertyName)
         {
             if (obj == null || string.IsNullOrWhiteSpace(propertyName))
@@ -271,39 +200,6 @@ namespace RcsTools
             {
                 return null;
             }
-        }
-
-        private static ObjectId GetObjectIdProperty(object obj, string propertyName)
-        {
-            try
-            {
-                object val = GetPropertyValue(obj, propertyName);
-                if (val is ObjectId id)
-                    return id;
-            }
-            catch
-            {
-            }
-
-            return ObjectId.Null;
-        }
-
-        private static ObjectId ToObjectId(object obj)
-        {
-            if (obj is ObjectId id)
-                return id;
-
-            try
-            {
-                object value = GetPropertyValue(obj, "ObjectId");
-                if (value is ObjectId oid)
-                    return oid;
-            }
-            catch
-            {
-            }
-
-            return ObjectId.Null;
         }
 
         private static string TryGetByReflection(object obj, params string[] propertyNames)

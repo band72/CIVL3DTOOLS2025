@@ -1,4 +1,4 @@
-﻿using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -11,7 +11,7 @@ using System.IO;
 using System.Linq;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
-namespace C3dDescriptionKeyProjects2026
+namespace C3dProjects25
 {
     public class RcsImportPointStylesNet8
     {

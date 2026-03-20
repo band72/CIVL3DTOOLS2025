@@ -152,7 +152,7 @@ namespace RCS.C3D2025
                         else
                         {
                             // Create new set if missing
-                            setId = PointDescriptionKeySet.Create(doc.Database);
+                            setId = keySets.Add(setName);
                             var newSetObj = tr.GetObject(setId, OpenMode.ForWrite) as PointDescriptionKeySet;
                             newSetObj.Name = setName;
                         }
