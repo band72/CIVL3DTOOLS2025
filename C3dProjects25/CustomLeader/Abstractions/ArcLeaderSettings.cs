@@ -2,6 +2,8 @@ namespace RCS.CustomLeader.Abstractions
 {
     public sealed class ArcLeaderSettings
     {
+        public static ArcLeaderSettings Current { get; } = new ArcLeaderSettings();
+
         public string HeadBlockName { get; set; } = "RCS_LEADER_HEAD";
         public double HeadScale { get; set; } = 1.0;
         public double HeadRotationOffsetDeg { get; set; } = 0.0;

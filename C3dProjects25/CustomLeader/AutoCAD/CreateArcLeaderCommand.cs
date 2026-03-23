@@ -31,7 +31,7 @@ namespace RCS.CustomLeader.AutoCAD.Commands
                 if (p2Res.Status != PromptStatus.OK) return;
 
                 // 3. User Jig for Box Point
-                var settings = new ArcLeaderSettings(); // Later loaded from JSON/Dictionary
+                var settings = ArcLeaderSettings.Current;
                 var jig = new ArcLeaderPlacementJig(p1Res.Value, p2Res.Value, settings);
                 
                 var p3Res = ed.Drag(jig);
