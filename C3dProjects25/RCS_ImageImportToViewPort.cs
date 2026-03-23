@@ -8,14 +8,12 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 
-[assembly: CommandClass(typeof(RcsTools.CaptureMeasOsmCommand))]
+// [assembly: CommandClass(typeof(RcsTools.CaptureMeasOsmCommand))]
 
 namespace RcsTools
 {
-    public class CaptureMeasOsmCommand : IExtensionApplication
+    public class CaptureMeasOsmCommand
     {
-        public void Initialize() { }
-        public void Terminate() { }
 
         [CommandMethod("RCS_CAPTURE_MEAS_OSM")]
         public void CaptureMeasOsm()

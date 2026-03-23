@@ -1,4 +1,4 @@
-﻿using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
@@ -13,7 +13,7 @@ using System.Text;
 using AcApp = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 using DBObject = Autodesk.AutoCAD.DatabaseServices.DBObject;
 
-[assembly: CommandClass(typeof(RcsTools.ExportDescriptionKeysCommand))]
+// [assembly: CommandClass(typeof(RcsTools.ExportDescriptionKeysCommand))]
 
 namespace RcsTools
 {

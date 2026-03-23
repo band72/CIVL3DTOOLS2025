@@ -1,3 +1,4 @@
+#nullable enable
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -159,7 +160,7 @@ namespace C3dProjects25
         {
             if (string.IsNullOrWhiteSpace(layerName) || layerName == "0") return;
 
-            DisplayStyle ds = null;
+            DisplayStyle? ds = null;
             try
             {
                 switch (viewType)

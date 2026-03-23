@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // RCS_QA_MASTER.cs
 // Civil 3D 2025 – Unified QA Tagging + Validation System
 // Updated: Supports Text, MText, and Images in Any Space
@@ -19,15 +19,11 @@ using Autodesk.AutoCAD.Runtime;
 
 namespace RCS.QA
 {
-    public class RcsQaMaster : IExtensionApplication
+    public class RcsQaMaster
     {
         const string AppName = "RCS_QA";
         const string LogPath = @"C:\temp\c3doutput.txt";
 
-        #region INIT
-        public void Initialize() => Log("INIT");
-        public void Terminate() => Log("TERM");
-        #endregion
 
         // =====================================================
         // COMMANDS
@@ -206,10 +202,10 @@ namespace RCS.QA
 
         class TypeRule
         {
-            public string Type;
-            public string Layer;
-            public string Style;
-            public Regex Content;
+            public string Type { get; set; }
+            public string Layer { get; set; }
+            public string Style { get; set; }
+            public Regex Content { get; set; }
         }
 
         static readonly List<TypeRule> TypeRules = new()
@@ -239,9 +235,9 @@ namespace RCS.QA
 
         class ValRule
         {
-            public string Type;
-            public bool Required;
-            public Regex Regex;
+            public string Type { get; set; }
+            public bool Required { get; set; }
+            public Regex Regex { get; set; }
         }
 
         static readonly List<ValRule> ValidationRules = new()

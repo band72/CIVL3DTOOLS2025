@@ -1,4 +1,4 @@
-﻿// RCS_PointStyle_DescKeyLayerApply.cs
+// RCS_PointStyle_DescKeyLayerApply.cs
 // Civil 3D / AutoCAD .NET 2025+
 //
 // Command:
@@ -40,7 +40,7 @@ namespace RCS.C3D2025
         // Priority rule for duplicate codes across multiple DescKey sets:
         //   true  -> first match wins (keeps earliest found)
         //   false -> last match wins (overwrites prior)
-        private const bool FirstMatchWins = true;
+        private static readonly bool FirstMatchWins = true;
 
         [CommandMethod("RCS_APPLY_DESCKEY_LAYERS_TO_POINTSTYLES")]
         public void ApplyDescKeyLayersToPointStyles()

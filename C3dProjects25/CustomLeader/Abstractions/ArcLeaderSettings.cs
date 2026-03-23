@@ -11,9 +11,9 @@ namespace RCS.CustomLeader.Abstractions
         public string TextLayer { get; set; } = "C-ANNO-NOTE";
 
         public string TextStyleName { get; set; } = "Standard";
-        public double TextHeight { get; set; } = 0.10;
-        public double BoxOffset { get; set; } = 0.20;
-        public double BoxPadding { get; set; } = 0.08;
+        public double TextHeight { get; set; } = 1.8;
+        public double BoxOffset { get; set; } = 3.6;
+        public double BoxPadding { get; set; } = 1.44;
 
         public bool UseBackgroundMask { get; set; } = true;
         public bool CreateRectangularFrame { get; set; } = true;

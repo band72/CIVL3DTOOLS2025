@@ -25,13 +25,28 @@ namespace RCS.CustomLeader.Core.Geometry
 
         public static double GetStartTangentAngle(Arc arc)
         {
-            return 0.0;
+            var plane = new Plane(arc.Center, arc.Normal);
+            var firstDeriv = arc.GetFirstDerivative(arc.StartParam);
+            return firstDeriv.AngleOnPlane(plane);
         }
 
-        public static BlockReference CreateHeadBlock(Point3d position, double tangentAngle, ArcLeaderSettings settings)
+        public static Entity CreateHeadBlock(Point3d position, double tangentAngle, ArcLeaderSettings settings)
         {
-            // Do not simply return new BlockReference()! It lacks an ObjectId definition and will crash AutoCAD.
-            return null;
+            // Dynamically scale the arrowhead based on Text Height
+            double scale = settings.TextHeight;
+            double length = scale * 1.5; 
+            double halfWidth = scale * 0.25;
+
+            // tangentAngle points *along* the curve leaving the tip
+            Vector3d dir = new Vector3d(Math.Cos(tangentAngle), Math.Sin(tangentAngle), 0);
+            Vector3d perp = new Vector3d(-Math.Sin(tangentAngle), Math.Cos(tangentAngle), 0); 
+
+            Point3d p1 = position; // Tip of the arrow
+            Point3d p2 = position + dir * length + perp * halfWidth; 
+            Point3d p3 = position + dir * length - perp * halfWidth; 
+
+            // Returns a 2D filled Solid triangle for the arrowhead
+            return new Solid(p1, p2, p3);
         }
     }
 }

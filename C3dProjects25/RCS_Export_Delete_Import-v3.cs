@@ -1,4 +1,4 @@
-﻿using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -1490,28 +1490,28 @@ namespace RCS.C3D2025
         [DataContract]
         private class PointStyleExportFile
         {
-            [DataMember] public string CivilVersion;
-            [DataMember] public string ExportedUtc;
-            [DataMember] public List<PointStyleExport> PointStyles;
+            [DataMember] public string CivilVersion { get; set; }
+            [DataMember] public string ExportedUtc { get; set; }
+            [DataMember] public List<PointStyleExport> PointStyles { get; set; }
         }
 
         [DataContract]
         private class PointStyleExport
         {
-            [DataMember] public string Name;
-            [DataMember] public DisplayLayers DisplayLayers;
-            [DataMember] public Dictionary<string, string> Props;
+            [DataMember] public string Name { get; set; }
+            [DataMember] public DisplayLayers DisplayLayers { get; set; }
+            [DataMember] public Dictionary<string, string> Props { get; set; }
         }
 
         [DataContract]
         private class DisplayLayers
         {
-            [DataMember] public string PlanMarker;
-            [DataMember] public string PlanLabel;
-            [DataMember] public string ModelMarker;
-            [DataMember] public string ModelLabel;
-            [DataMember] public string ProfileMarker;
-            [DataMember] public string SectionMarker;
+            [DataMember] public string PlanMarker { get; set; }
+            [DataMember] public string PlanLabel { get; set; }
+            [DataMember] public string ModelMarker { get; set; }
+            [DataMember] public string ModelLabel { get; set; }
+            [DataMember] public string ProfileMarker { get; set; }
+            [DataMember] public string SectionMarker { get; set; }
         }
 
         private static void WriteCsv(List<Row> rows, string path)

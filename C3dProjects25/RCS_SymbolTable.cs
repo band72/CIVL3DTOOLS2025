@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices;
@@ -10,17 +10,6 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.Civil.DatabaseServices;
 using Autodesk.Civil.DatabaseServices.Styles;
 using Table = Autodesk.AutoCAD.DatabaseServices.Table;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.Civil.DatabaseServices;
-using Autodesk.Civil.DatabaseServices.Styles;
-
 
 namespace Civil3D_SymbolTable
 {
@@ -173,6 +162,7 @@ namespace Civil3D_SymbolTable
                         tb.Cells[row, 2].BlockTableRecordId = data.BlockId;
 
                         // Scaling Logic: 50% Reduction via Padding
+#pragma warning disable CS0618
                         tb.SetAutoScale(row, 2, true);
 
                         double margin = rowHeight * 0.25; // 25% top + 25% bottom = 50% Used space
@@ -181,6 +171,7 @@ namespace Civil3D_SymbolTable
                         tb.SetMargin(row, 2, CellMargins.Bottom, margin);
                         tb.SetMargin(row, 2, CellMargins.Left, 1.0);
                         tb.SetMargin(row, 2, CellMargins.Right, 1.0);
+#pragma warning restore CS0618
 
                         tb.Cells[row, 2].Alignment = CellAlignment.MiddleCenter;
 
