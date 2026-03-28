@@ -22,7 +22,7 @@ namespace RCS.QA
     public class RcsQaMaster
     {
         const string AppName = "RCS_QA";
-        const string LogPath = @"C:\temp\c3doutput.txt";
+        static readonly string LogPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "RCS_QA_c3doutput.txt");
 
 
         // =====================================================
@@ -97,11 +97,9 @@ namespace RCS.QA
             {
                 if (!HasXData(ent))
                 {
-                    string type = "GEN"; // Default type for auto-tag
-
-                    // Optional: Auto-detect type based on object type?
+                    string type = "GEN";
                     if (ent is RasterImage) type = "IMAGE";
-
+                    ent.UpgradeOpen();
                     WriteXData(ent, Guid.NewGuid().ToString("D"), type);
                     count++;
                 }
@@ -115,11 +113,11 @@ namespace RCS.QA
         {
             RunOnLayoutEntities(ent =>
             {
-                // Only run logic on Text/MText for content inference
                 if (ent is DBText || ent is MText)
                 {
                     var data = ReadXData(ent);
                     string type = InferType(ent);
+                    ent.UpgradeOpen();
                     WriteXData(ent,
                         string.IsNullOrWhiteSpace(data.id) ? Guid.NewGuid().ToString("D") : data.id,
                         type);
@@ -250,12 +248,13 @@ namespace RCS.QA
         // CORE HELPERS
         // =====================================================
 
+        // NOTE: action is responsible for calling ent.UpgradeOpen() if it needs to write.
+        // Do NOT unconditionally upgrade here — read-only passes would hold unnecessary write locks.
         static void RunOnLayoutEntities(Action<Entity> action)
             => RunTransaction((tr, db) =>
             {
                 foreach (var ent in GetTargetEntities(tr, db))
                 {
-                    ent.UpgradeOpen();
                     action(ent);
                 }
             });
@@ -336,7 +335,7 @@ namespace RCS.QA
 
         static void EnsureDir()
         {
-            try { if (!Directory.Exists(@"C:\temp")) Directory.CreateDirectory(@"C:\temp"); } catch { }
+            // Log directory is the OS temp folder; it always exists — nothing to create.
         }
 
         static void Log(string s)

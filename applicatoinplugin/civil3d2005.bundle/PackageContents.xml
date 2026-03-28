@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage 
+    SchemaVersion="1.0" 
+    AppVersion="1.0.0" 
+    Author="RCS" 
+    Name="RCS Tools" 
+    Description="RCS Civil 3D 2025 Tools">
+  
+  <CompanyDetails Name="RCS" Url="http://www.example.com" Email="support@example.com"/>
+
+  <Components Description="AutoCAD .NET assemblies">
+    <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R25.0" SeriesMax="R25.2"/>
+    <ComponentEntry 
+        AppName="C3dProjects25" 
+        Version="1.0.0" 
+        ModuleName="./Contents/C3dProjects25_v8.dll"  
+        AppDescription="RCS civil3d toolset"
+        LoadOnAutoCADStartup="True" 
+        LoadOnCommandInvocation="False" />
+  </Components>
+</ApplicationPackage>

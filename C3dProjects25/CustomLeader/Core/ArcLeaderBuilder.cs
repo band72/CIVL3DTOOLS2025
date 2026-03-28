@@ -103,7 +103,42 @@ namespace RCS.CustomLeader.Core.Builders
             if (definition == null) throw new ArgumentNullException(nameof(definition));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
-            // TODO: Open existing entities by ID, recalculate geometry, and update them in place
+            // Erase the old component entities, then reconstruct via Build() with the original geometry.
+            using (var tr = _db.TransactionManager.StartTransaction())
+            {
+                EraseIfValid(tr, definition.ArcId);
+                EraseIfValid(tr, definition.HeadBlockId);
+                EraseIfValid(tr, definition.TextId);
+                EraseIfValid(tr, definition.GroupId);
+                tr.Commit();
+            }
+
+            // Clear stale IDs before rebuilding
+            definition.ArcId       = Autodesk.AutoCAD.DatabaseServices.ObjectId.Null;
+            definition.HeadBlockId = Autodesk.AutoCAD.DatabaseServices.ObjectId.Null;
+            definition.TextId      = Autodesk.AutoCAD.DatabaseServices.ObjectId.Null;
+            definition.GroupId     = Autodesk.AutoCAD.DatabaseServices.ObjectId.Null;
+
+            // Reconstruct using stored geometry
+            var rebuilt = Build(definition.HeadPoint, definition.ThroughPoint, definition.BoxPoint,
+                                definition.TextValue, settings);
+
+            // Copy new IDs back into the passed-in definition so callers stay in sync
+            definition.ArcId       = rebuilt.ArcId;
+            definition.HeadBlockId = rebuilt.HeadBlockId;
+            definition.TextId      = rebuilt.TextId;
+            definition.GroupId     = rebuilt.GroupId;
+        }
+
+        private static void EraseIfValid(Transaction tr, Autodesk.AutoCAD.DatabaseServices.ObjectId id)
+        {
+            if (id == Autodesk.AutoCAD.DatabaseServices.ObjectId.Null || id.IsErased) return;
+            try
+            {
+                var obj = tr.GetObject(id, OpenMode.ForWrite, false);
+                obj?.Erase();
+            }
+            catch { /* entity may already be gone */ }
         }
 
         private void EnsureLayerExists(Transaction tr, string layerName)

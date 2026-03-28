@@ -15,7 +15,13 @@ namespace RCS.C3D2025.Tools
         private static readonly Dictionary<string, (string MasterCode, string MasterDesc)> _codeMap =
             new Dictionary<string, (string, string)>(StringComparer.OrdinalIgnoreCase)
             {
-                { "CMF", ("CMF 4X4 (NO-ID)", "CMF 4X4 (NO-ID)") },
+                { "FOUND NAIL & DISK*", ("NAIL&DISK\\P FOUND","NAIL&DISK \\P FND") },
+                { "NDF*", ("NAIL&DISK\\P FOUND","NAIL&DISK \\P FND") },
+                { "IRS*", ("SIR", "SIR ") },
+                { "IRF*", ("FIR", "FIR ") },
+                { "IPS*", ("SIP", "SIP ") },
+                { "IPF*", ("FIP", "FIP ") },
+                { "CMF", ("CMF 4X4 (NO-ID)", "CMF 4X4 \\P (NO-ID)") },
                 { "15RCP", ("RCP", "Reinforced Concrete Pipe") },
                 { "18CMP", ("CMP", "Corrugated Metal Pipe") },
                 { "18RCP", ("RCP", "Reinforced Concrete Pipe") },
@@ -133,6 +139,23 @@ namespace RCS.C3D2025.Tools
                 { "IPF-5/8-NO-ID", ("FIP 5/8\\P (NO-ID)", "FIP 5/8\\P (NO-ID)") }
             };
 
+        // Pre-cleaned version of _codeMap keys (hyphens, quotes stripped) built once at class load.
+        // Avoids redundant string allocations inside the nested per-point loops.
+        private static readonly Dictionary<string, (string MasterCode, string MasterDesc)> _cleanedCodeMap =
+            BuildCleanedCodeMap();
+
+        private static Dictionary<string, (string MasterCode, string MasterDesc)> BuildCleanedCodeMap()
+        {
+            var result = new Dictionary<string, (string MasterCode, string MasterDesc)>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kvp in _codeMap)
+            {
+                string cleanKey = kvp.Key.Replace("-", "").Replace("'", "").Replace("\"", "");
+                // Last writer wins for any accidental duplicates after cleaning
+                result[cleanKey] = kvp.Value;
+            }
+            return result;
+        }
+
         [CommandMethod("RCS_CONVERT_COGO_CODES")]
         public void RunConvertCogoCodes()
         {
@@ -164,7 +187,7 @@ namespace RCS.C3D2025.Tools
                 {
                     ss = psr.Value;
                 }
-                else if (psr.Status == PromptStatus.None || psr.Status == PromptStatus.Error)
+                else if (psr.Status == PromptStatus.None)
                 {
                     // User pressed Enter without selection -> Process ALL COGO points
                     PromptSelectionResult allPsr = ed.SelectAll(filter);
@@ -201,24 +224,96 @@ namespace RCS.C3D2025.Tools
                             string raw = point.RawDescription;
                             if (raw != null)
                             {
-                                string key = raw.Trim();
-                                if (_codeMap.TryGetValue(key, out var mapping))
+                                // First step in cleaning: remove hyphens, single quotes, and double quotes
+                                string cleanedRaw = raw.Replace("-", "").Replace("'", "").Replace("\"", "");
+
+                                // Track whether the point has already been upgraded to ForWrite
+                                // to avoid a double UpgradeOpen() when cleaning AND a map match both fire.
+                                bool isUpgraded = false;
+
+                                // Unconditionally save the cleaned string back to the point immediately
+                                if (raw != cleanedRaw)
                                 {
-                                    // Upgrade to Write mode
                                     point.UpgradeOpen();
+                                    isUpgraded = true;
+                                    point.RawDescription = cleanedRaw;
+                                }
+
+                                string searchKey = cleanedRaw.Trim();
+
+                                bool matched = false;
+                                string remainder = "";
+                                (string MasterCode, string MasterDesc) mapping = (string.Empty, string.Empty);
+
+                                // 1. Try Exact match first using pre-cleaned key map (no per-iteration allocations)
+                                foreach (var kvp in _cleanedCodeMap)
+                                {
+                                    if (!kvp.Key.EndsWith("*") && string.Equals(searchKey, kvp.Key, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        matched = true;
+                                        mapping = kvp.Value;
+                                        remainder = ""; // Exact matches leave no remainder
+                                        break;
+                                    }
+                                }
+
+                                // 2. Try Wildcard match fallback (key ends with *)
+                                if (!matched)
+                                {
+                                    foreach (var kvp in _cleanedCodeMap)
+                                    {
+                                        if (kvp.Key.EndsWith("*"))
+                                        {
+                                            string prefix = kvp.Key.Substring(0, kvp.Key.Length - 1); // remove the *
+                                            if (searchKey.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                matched = true;
+                                                mapping = kvp.Value;
+                                                remainder = searchKey.Substring(prefix.Length);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (matched)
+                                {
+                                    // Only upgrade to Write mode if not already done during the cleaning step
+                                    if (!isUpgraded)
+                                    {
+                                        point.UpgradeOpen();
+                                        isUpgraded = true;
+                                    }
 
                                     string newCode = mapping.MasterCode;
                                     string newDesc = mapping.MasterDesc;
 
+                                    // Dynamic inline regex formatter to correctly space fractions and inject \P line breaks for IDs
+                                    Func<string, string> formatSuffixes = (text) => 
+                                    {
+                                        if (string.IsNullOrWhiteSpace(text)) return text;
+                                        
+                                        // Ensure space between Letters and Fractions (e.g. FIP1/2 -> FIP 1/2)
+                                        text = System.Text.RegularExpressions.Regex.Replace(text, @"([A-Za-z])(\d+/\d+)", "$1 $2");
+                                        
+                                        // Sub-format NOID suffix (e.g. 1/2NOID -> 1/2 \P NO-ID)
+                                        text = System.Text.RegularExpressions.Regex.Replace(text, @"(\d+/\d+)\s*(NOID)", "$1 \\P NO-ID", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                                        
+                                        // Sub-format LB suffix (e.g. 1/2LB1234 -> 1/2 \P LB-1234)
+                                        text = System.Text.RegularExpressions.Regex.Replace(text, @"(\d+/\d+)\s*(LB)\s*(\d+)", "$1 \\P $2-$3", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                                        
+                                        return text.Replace("  ", " ").Trim();
+                                    };
+
                                     if (!string.IsNullOrWhiteSpace(newCode))
                                     {
-                                        point.RawDescription = newCode;
+                                        point.RawDescription = formatSuffixes(newCode + remainder);
                                     }
 
                                     if (!string.IsNullOrWhiteSpace(newDesc))
                                     {
                                         // Update DescriptionFormat for the FullDescription
-                                        point.DescriptionFormat = newDesc;
+                                        point.DescriptionFormat = formatSuffixes(newDesc + remainder);
                                     }
 
                                     cntHit++;

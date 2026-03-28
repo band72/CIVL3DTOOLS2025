@@ -3,10 +3,12 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <OutputType>Library</OutputType>
     <PlatformTarget>x64</PlatformTarget>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <AssemblyName>C3dProjects25_v7</AssemblyName>
+    <AssemblyName>C3dProjects25_v8</AssemblyName>
     <NoWarn>MSB3277</NoWarn>
   </PropertyGroup>
 
@@ -41,6 +43,10 @@
       <HintPath>..\..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2025\accoremgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="AdWindows">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2025\AdWindows.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Acdbmgd">
       <HintPath>..\..\..\..\..\..\..\..\Program Files\Autodesk\AutoCAD 2025\acdbmgd.dll</HintPath>
       <Private>False</Private>
@@ -62,5 +68,11 @@
       <Private>False</Private>
     </Reference> 
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Message Importance="high" Text="Copying plugin to applicatoinplugin folder..." />
+    <MakeDir Directories="$(ProjectDir)..\applicatoinplugin\civil3d2025.bundle\Contents" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ProjectDir)..\applicatoinplugin\civil3d2025.bundle\Contents" />
+  </Target>
 
 </Project>

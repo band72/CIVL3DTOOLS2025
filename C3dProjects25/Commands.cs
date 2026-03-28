@@ -13,7 +13,10 @@ namespace RCS.C3D2025.Tools
             try
             {
                 Application.DocumentManager.MdiActiveDocument?.Editor.WriteMessage(
-                    "\nRCS_C3D2025_Tools loaded. Commands: RCS_TEST, RCS_HELP_RCS, RCS_FIX_DESC_KEY_SCALE");
+                    "\nRCS_C3D2025_Tools loaded. Type RCS_HELP_RCS for a full command list.");
+                
+                // Initialize Ribbon
+                RibbonUI.InitializeRibbon();
             }
             catch { }
         }
@@ -36,9 +39,36 @@ namespace RCS.C3D2025.Tools
 
             Editor ed = doc.Editor;
             ed.WriteMessage(
-                "\nRCS Commands:" +
-                "\n - RCS_TEST" +
-                "\n - RCS_FIX_DESC_KEY_SCALE (FixedScaleFactor=0.02, UseDrawingScale=true)");
+                "\nRCS Tools — Command Reference" +
+                "\n\n--- QA Tools ---" +
+                "\n  RCS_QA_RUN              Run QA validation pass (tags failures red)" +
+                "\n  RCS_QA_TAGGER           Manually tag objects with a QA type" +
+                "\n  RCS_QA_AUTOTAG          Auto-tag all Text/MText/Images in current space" +
+                "\n  RCS_QA_AUTOTYPE         Auto-infer QA types from text content" +
+                "\n  RCS_QA_FIX_DUPLICATES   Reassign duplicate XData IDs" +
+                "\n\n--- Point Styles ---" +
+                "\n  RCS_EXPORT_POINTSTYLES_CSV               Export point styles to CSV" +
+                "\n  RCS_IMPORT_POINTSTYLES_V4                Import point styles from CSV" +
+                "\n  RCS_DELETE_POINTSTYLES_FROM_CSV          Delete styles listed in CSV" +
+                "\n  RCS_DELETE_ALL_POINTSTYLES               Delete ALL point styles" +
+                "\n  RCS_FORCE_POINTSTYLE_ALL_VIEWS_BYLAYER   Set all views to ByLayer" +
+                "\n  RCS_APPLY_DESCKEY_LAYERS_TO_POINTSTYLES  Apply DescKey layers to styles" +
+                "\n\n--- Description Keys ---" +
+                "\n  RCS_EXPORT_DESCKEY_CODE_BLOCKS  Export DescKey codes + block names" +
+                "\n  RCS_IMPORT_DESC_KEYSETSV2       Import DescKey sets" +
+                "\n  RCS_FIX_DESC_KEY_SCALE          Fix DescKey scale factors" +
+                "\n\n--- Tables & Symbols ---" +
+                "\n  RCS_CreateSymbolTableRobust           Build a symbol table" +
+                "\n  RCS_TABLES_FROM_WINDOW                Build Line/Curve tables from window" +
+                "\n  RCS_BUILD_CURVE_TABLE                 Build a Curve table from MText labels" +
+                "\n  RCS_MATCH_POINTSTYLE_BLOCK_MARKERS_NET Match point style block markers" +
+                "\n\n--- Drafting Utilities ---" +
+                "\n  RCS_SET_ALL_BLOCKS_TO_LAYER0  Move all blocks to Layer 0" +
+                "\n  RCS_CONVERT_COGO_CODES        Batch convert COGO raw descriptions to master codes" +
+                "\n  RCS_APPLY_TEMPLATE            Apply a drawing template" +
+                "\n  RCS_ARCLEADER                 Create an arc leader annotation" +
+                "\n  RCS_ARCLEADER_TEXTSIZE        Set the arc leader text size" +
+                "\n  RCS_PRINT_MULTI_SHEETS        Batch print layouts to a single multi-page PDF");
         }
     }
 }
