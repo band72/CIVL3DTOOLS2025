@@ -24,11 +24,12 @@ namespace RCS.CustomLeader.Core.Geometry
         }
 
         /// <summary>
-        /// Creates a gently curved arc between <paramref name="from"/> and <paramref name="to"/>
-        /// by offsetting the chord midpoint perpendicular by <paramref name="curveFactor"/> × chord length.
-        /// Used for the V2 tail arc.
+        /// Creates a curved arc between <paramref name="from"/> and <paramref name="to"/> using
+        /// the sagitta formula to match <paramref name="radius"/> exactly.
+        /// When <paramref name="radius"/> is 0 or less than half the chord, falls back to a
+        /// gentle 15% chord-offset heuristic.
         /// </summary>
-        public static Arc CreateTailArc(Point3d from, Point3d to, double curveFactor = 0.15)
+        public static Arc CreateTailArc(Point3d from, Point3d to, double radius = 0)
         {
             try
             {
@@ -42,12 +43,25 @@ namespace RCS.CustomLeader.Core.Geometry
                     (from.Y + to.Y) / 2.0,
                     (from.Z + to.Z) / 2.0);
 
-                // Perpendicular to chord in the XY plane
+                // Unit perpendicular to chord in the XY plane
                 Vector3d perp = new Vector3d(-chord.Y, chord.X, 0).GetNormal();
 
-                // Offset midpoint slightly to produce a gentle curvature
-                Point3d throughPoint = mid + perp * (chordLen * curveFactor);
+                double halfChord = chordLen / 2.0;
+                double offset;
 
+                if (radius > halfChord)
+                {
+                    // Sagitta: the perpendicular distance from chord midpoint to arc midpoint
+                    // that exactly reproduces the requested radius.
+                    offset = radius - Math.Sqrt(radius * radius - halfChord * halfChord);
+                }
+                else
+                {
+                    // Fallback: radius too small for this chord — use gentle percentage heuristic
+                    offset = chordLen * 0.15;
+                }
+
+                Point3d throughPoint = mid + perp * offset;
                 return CreateArc(from, throughPoint, to);
             }
             catch

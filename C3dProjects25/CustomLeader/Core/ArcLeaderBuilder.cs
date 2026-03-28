@@ -128,11 +128,13 @@ namespace RCS.CustomLeader.Core.Builders
                 // ── Step 1: derive geometry from main arc (in-memory, NOT added to DB) ──────
                 double  tangentAngle = 0.0;
                 Point3d tailArcEnd   = p3; // safe fallback
+                double  mainArcRadius = 0.0;
 
                 var mainArc = ArcLeaderGeometryService.CreateArc(p1, p2, p3);
                 if (mainArc != null)
                 {
-                    tangentAngle = ArcLeaderGeometryService.GetStartTangentAngle(mainArc);
+                    tangentAngle  = ArcLeaderGeometryService.GetStartTangentAngle(mainArc);
+                    mainArcRadius = mainArc.Radius;
 
                     // Build a temporary MText to find where the main arc would be trimmed
                     using (var tempMtext = ArcLeaderBoxService.CreateBox(p3, text, settings))
@@ -170,7 +172,7 @@ namespace RCS.CustomLeader.Core.Builders
                     tr.AddNewlyCreatedDBObject(mtext, true);
 
                     // ── Step 4: tail arc from p2 to tailArcEnd, gently curved ───────────
-                    var tailArc = ArcLeaderGeometryService.CreateTailArc(p2, tailArcEnd);
+                    var tailArc = ArcLeaderGeometryService.CreateTailArc(p2, tailArcEnd, mainArcRadius);
                     if (tailArc != null)
                     {
                         if (!string.IsNullOrWhiteSpace(settings.ArcLayer))

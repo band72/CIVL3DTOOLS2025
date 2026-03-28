@@ -57,14 +57,16 @@ namespace RCS.CustomLeader.AutoCAD.Jigs
             try
             {
                 // ── 1. Compute main arc in memory to find the tail arc endpoint ────────────
-                Point3d tailArcEnd   = _p3; // fallback
+                Point3d tailArcEnd   = _p3;
                 double  tangentAngle = 0.0;
+                double  mainArcRadius = 0.0;
 
                 using (var mainArc = ArcLeaderGeometryService.CreateArc(_p1, _p2, _p3))
                 {
                     if (mainArc != null)
                     {
-                        tangentAngle = ArcLeaderGeometryService.GetStartTangentAngle(mainArc);
+                        tangentAngle  = ArcLeaderGeometryService.GetStartTangentAngle(mainArc);
+                        mainArcRadius = mainArc.Radius;
 
                         // Approximate trim using a temporary MText (not drawn)
                         using (var tempMtext = ArcLeaderBoxService.CreateBox(_p3, _settings.DefaultText, _settings))
@@ -79,7 +81,7 @@ namespace RCS.CustomLeader.AutoCAD.Jigs
                 }
 
                 // ── 2. Draw tail arc preview ───────────────────────────────────────────────
-                using (var tailArc = ArcLeaderGeometryService.CreateTailArc(_p2, tailArcEnd))
+                using (var tailArc = ArcLeaderGeometryService.CreateTailArc(_p2, tailArcEnd, mainArcRadius))
                 {
                     if (tailArc != null)
                         draw.Geometry.Draw(tailArc);
