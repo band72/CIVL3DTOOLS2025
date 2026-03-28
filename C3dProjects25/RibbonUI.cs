@@ -195,17 +195,13 @@ namespace RCS.C3D2025.Tools
 
         public void Execute(object parameter)
         {
-            if (parameter is RibbonButton button)
+            // parameter is the value of CommandParameter — the command string directly.
+            // (It is NOT the RibbonButton itself — that was the previous bug.)
+            string cmd = parameter as string;
+            if (!string.IsNullOrEmpty(cmd))
             {
                 Document doc = Application.DocumentManager.MdiActiveDocument;
-                if (doc != null)
-                {
-                    string cmd = button.CommandParameter as string;
-                    if (!string.IsNullOrEmpty(cmd))
-                    {
-                        doc.SendStringToExecute(cmd, true, false, false);
-                    }
-                }
+                doc?.SendStringToExecute(cmd, true, false, false);
             }
         }
     }
