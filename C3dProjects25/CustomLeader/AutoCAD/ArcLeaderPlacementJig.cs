@@ -58,7 +58,7 @@ namespace RCS.CustomLeader.AutoCAD.Jigs
                         
                         // Because actual block inserts require Database access which isn't safe inside a Jig WorldDraw
                         // We will instead draw a temporary cross or vector line at p1 showing the tangent angle.
-                        var tangentAngle = ArcLeaderGeometryService.GetStartTangentAngle(arc);
+                        var tangentAngle = ArcLeaderGeometryService.GetChordAngleAt(arc, _p1, _settings.TextHeight * 1.5);
                         // A short graphical 1-unit line pointing tangentially where the arrow block will point
                         var dummyArrowPath = new Autodesk.AutoCAD.Geometry.Vector3d(Math.Cos(tangentAngle), Math.Sin(tangentAngle), 0).GetNormal() * (_settings.TextHeight * 5);
                         draw.Geometry.WorldLine(_p1, _p1 + dummyArrowPath);

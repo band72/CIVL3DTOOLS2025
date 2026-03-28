@@ -50,7 +50,7 @@ namespace RCS.CustomLeader.Core.Builders
                     def.ArcId = btr.AppendEntity(arc);
                     tr.AddNewlyCreatedDBObject(arc, true);
 
-                    tangentAngle = ArcLeaderGeometryService.GetStartTangentAngle(arc);
+                    tangentAngle = ArcLeaderGeometryService.GetChordAngleAt(arc, p1, settings.TextHeight * 1.5);
                 }
 
                 // 2. Generate Head Block (Safely)
@@ -99,10 +99,10 @@ namespace RCS.CustomLeader.Core.Builders
         }
 
         /// <summary>
-        /// V2 Arc Leader: same interaction as V1 (head → through → box) but the final drawing
-        /// contains only the arrowhead + a gently-curved tail arc + text box.
-        /// The primary arc (p1→p2→p3) is computed in memory solely to derive the arrowhead
-        /// tangent angle and the tail arc endpoint, then discarded.
+        /// V2 Arc Leader: identical to V1 (main arc + arrowhead + text box) PLUS a second arc.
+        /// The second arc runs from the arrowhead's back end (arrowBase) through the midpoint
+        /// of that chord to the trimmed endpoint of the first arc (the text-box end).
+        /// This creates a "double-arc" leader with a small curved tail behind the arrowhead.
         /// </summary>
         public ArcLeaderDefinition BuildV2(Point3d p1, Point3d p2, Point3d p3, string text, ArcLeaderSettings settings)
         {
@@ -125,32 +125,16 @@ namespace RCS.CustomLeader.Core.Builders
                 EnsureLayerExists(tr, settings.HeadLayer);
                 EnsureLayerExists(tr, settings.TextLayer);
 
-                // ── Step 1: derive geometry from main arc (in-memory, NOT added to DB) ──────
-                double  tangentAngle = 0.0;
-                Point3d tailArcEnd   = p3; // safe fallback
-                double  mainArcRadius = 0.0;
+                // ── Step 1: Main arc (computed and added to DB) ──────────────────────────
+                var arc = ArcLeaderGeometryService.CreateArc(p1, p2, p3);
+                double tangentAngle = 0.0;
 
-                var mainArc = ArcLeaderGeometryService.CreateArc(p1, p2, p3);
-                if (mainArc != null)
+                if (arc != null)
                 {
-                    tangentAngle  = ArcLeaderGeometryService.GetStartTangentAngle(mainArc);
-                    mainArcRadius = mainArc.Radius;
-
-                    // Build a temporary MText to find where the main arc would be trimmed
-                    using (var tempMtext = ArcLeaderBoxService.CreateBox(p3, text, settings))
-                    {
-                        ArcLeaderBoxService.TrimArcToMText(mainArc, tempMtext, settings);
-                    }
-
-                    // After trimming, the endpoint closest to p3 is where the tail arc terminates
-                    tailArcEnd = mainArc.StartPoint.DistanceTo(p3) < mainArc.EndPoint.DistanceTo(p3)
-                                 ? mainArc.StartPoint
-                                 : mainArc.EndPoint;
-
-                    mainArc.Dispose(); // Never added to DB — dispose manually
+                    tangentAngle = ArcLeaderGeometryService.GetChordAngleAt(arc, p1, settings.TextHeight * 1.5);
                 }
 
-                // ── Step 2: arrowhead at p1 (identical to V1) ─────────────────────────────
+                // ── Step 2: Arrowhead (same as V1) ───────────────────────────────────────
                 var headInfo = ArcLeaderGeometryService.CreateHeadBlock(p1, tangentAngle, settings);
                 if (headInfo != null)
                 {
@@ -161,7 +145,7 @@ namespace RCS.CustomLeader.Core.Builders
                     tr.AddNewlyCreatedDBObject(headInfo, true);
                 }
 
-                // ── Step 3: text box at p3 (identical to V1) ──────────────────────────────
+                // ── Step 3: Text box (same as V1) + trim main arc ────────────────────────
                 var mtext = ArcLeaderBoxService.CreateBox(p3, text, settings);
                 if (mtext != null)
                 {
@@ -171,26 +155,74 @@ namespace RCS.CustomLeader.Core.Builders
                     def.TextId = btr.AppendEntity(mtext);
                     tr.AddNewlyCreatedDBObject(mtext, true);
 
-                    // ── Step 4: tail arc from p2 to tailArcEnd, gently curved ───────────
-                    var tailArc = ArcLeaderGeometryService.CreateTailArc(p2, tailArcEnd, mainArcRadius);
+                    if (arc != null)
+                        ArcLeaderBoxService.TrimArcToMText(arc, mtext, settings);
+                }
+
+                // ── Step 4: Second arc (V2 addition) ─────────────────────────────────────
+                // arrowBase = back end of the arrowhead solid
+                // firstArcEnd = the trimmed endpoint of the main arc closest to p3 (text box)
+                // secondArc = arrowBase → chord-midpoint (slight perpendicular offset) → firstArcEnd
+                if (arc != null)
+                {
+                    double  arrowLength = settings.TextHeight * 1.5;
+                    var     tangentDir  = new Vector3d(Math.Cos(tangentAngle), Math.Sin(tangentAngle), 0);
+                    Point3d arrowBase   = p1 + tangentDir * arrowLength;
+
+                    // Build second arc: perfectly traces the first arc (same circle)
+                    Arc tailArc = (Arc)arc.Clone();
+                    
+                    // Find the exact point on the circle closest to the arrowhead base
+                    Point3d trueBaseOnArc = tailArc.GetClosestPointTo(arrowBase, false);
+                    double paramAtBase = tailArc.GetParameterAtPoint(trueBaseOnArc);
+
+                    double arcLength = tailArc.GetDistanceAtParameter(tailArc.EndParam);
+                    if (arcLength <= arrowLength)
+                    {
+                        // The entire arc is physically covered by the solid arrowhead.
+                        tailArc.Dispose();
+                        tailArc = null;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            if (tailArc.StartPoint.DistanceTo(p1) < tailArc.EndPoint.DistanceTo(p1))
+                            {
+                                tailArc.StartAngle = paramAtBase;
+                            }
+                            else
+                            {
+                                tailArc.EndAngle = paramAtBase;
+                            }
+                        }
+                        catch
+                        {
+                            tailArc.Dispose();
+                            tailArc = null;
+                        }
+                    }
                     if (tailArc != null)
                     {
                         if (!string.IsNullOrWhiteSpace(settings.ArcLayer))
                             tailArc.Layer = settings.ArcLayer;
-
-                        // Trim tail arc so it doesn't overlap the text box
-                        ArcLeaderBoxService.TrimArcToMText(tailArc, mtext, settings);
 
                         def.TailArcId = btr.AppendEntity(tailArc);
                         tr.AddNewlyCreatedDBObject(tailArc, true);
                     }
                 }
 
-                // ── Step 5: group all committed entities ───────────────────────────────────
+                if (arc != null)
+                {
+                    arc.Dispose();
+                }
+
+                // ── Step 5: Group all entities ────────────────────────────────────────────
                 var ids = new List<ObjectId>();
-                if (def.TailArcId   != ObjectId.Null) ids.Add(def.TailArcId);
+                if (def.ArcId       != ObjectId.Null) ids.Add(def.ArcId);
                 if (def.HeadBlockId != ObjectId.Null) ids.Add(def.HeadBlockId);
                 if (def.TextId      != ObjectId.Null) ids.Add(def.TextId);
+                if (def.TailArcId   != ObjectId.Null) ids.Add(def.TailArcId);
 
                 if (ids.Count > 0)
                     def.GroupId = GroupService.CreateGroup(_db, tr, ids);

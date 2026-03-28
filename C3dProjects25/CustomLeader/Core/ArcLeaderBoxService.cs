@@ -9,9 +9,12 @@ namespace RCS.CustomLeader.Core.Geometry
     {
         public static MText CreateBox(Point3d position, string text, ArcLeaderSettings settings)
         {
+            if (string.IsNullOrEmpty(text))
+                return null;
+
             var mtext = new MText();
             mtext.Location = position;
-            mtext.Contents = string.IsNullOrEmpty(text) ? "INTEX" : text;
+            mtext.Contents = text;
             mtext.TextHeight = settings.TextHeight;
             
             // Critical for accurate bounding box trimming later

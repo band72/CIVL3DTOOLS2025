@@ -47,11 +47,7 @@ namespace RCS.CustomLeader.AutoCAD.Commands
                 if (p3Res.Status != PromptStatus.OK) return;
 
                 // 4. Text content
-                var strRes = ed.GetString(new PromptStringOptions("\nEnter text: ")
-                {
-                    DefaultValue    = settings.DefaultText,
-                    UseDefaultValue = true
-                });
+                var strRes = ed.GetString(new PromptStringOptions("\nEnter text: "));
                 if (strRes.Status != PromptStatus.OK) return;
 
                 // 5. Build V2 and persist

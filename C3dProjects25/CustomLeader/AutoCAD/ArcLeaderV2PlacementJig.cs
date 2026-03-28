@@ -56,43 +56,61 @@ namespace RCS.CustomLeader.AutoCAD.Jigs
         {
             try
             {
-                // ── 1. Compute main arc in memory to find the tail arc endpoint ────────────
-                Point3d tailArcEnd   = _p3;
+                // ── 1. Main arc (same as V1) ───────────────────────────────────────────────
                 double  tangentAngle = 0.0;
-                double  mainArcRadius = 0.0;
+                Point3d firstArcEnd  = _p3;
 
                 using (var mainArc = ArcLeaderGeometryService.CreateArc(_p1, _p2, _p3))
                 {
                     if (mainArc != null)
                     {
-                        tangentAngle  = ArcLeaderGeometryService.GetStartTangentAngle(mainArc);
-                        mainArcRadius = mainArc.Radius;
+                        tangentAngle = ArcLeaderGeometryService.GetChordAngleAt(mainArc, _p1, _settings.TextHeight * 1.5);
 
-                        // Approximate trim using a temporary MText (not drawn)
+                        // Trim against text box to find the far endpoint
                         using (var tempMtext = ArcLeaderBoxService.CreateBox(_p3, _settings.DefaultText, _settings))
                         {
-                            ArcLeaderBoxService.TrimArcToMText(mainArc, tempMtext, _settings);
+                            if (tempMtext != null)
+                                ArcLeaderBoxService.TrimArcToMText(mainArc, tempMtext, _settings);
                         }
 
-                        tailArcEnd = mainArc.StartPoint.DistanceTo(_p3) < mainArc.EndPoint.DistanceTo(_p3)
-                                     ? mainArc.StartPoint
-                                     : mainArc.EndPoint;
+                        firstArcEnd = mainArc.StartPoint.DistanceTo(_p3) < mainArc.EndPoint.DistanceTo(_p3)
+                                      ? mainArc.StartPoint
+                                      : mainArc.EndPoint;
+
+                        // ── 2. Arrowhead indicator (same as V1) ───────────────────────────
+                        double  arrowLength = _settings.TextHeight * 1.5;
+                        var     tangentDir  = new Vector3d(Math.Cos(tangentAngle), Math.Sin(tangentAngle), 0);
+                        Point3d arrowBase   = _p1 + tangentDir * arrowLength;
+                        draw.Geometry.WorldLine(_p1, arrowBase);
+
+                        // ── 3. Second arc: exactly traces main arc ────────────────────────
+                        using (var tailArc = (Arc)mainArc.Clone())
+                        {
+                            Point3d trueBaseOnArc = tailArc.GetClosestPointTo(arrowBase, false);
+                            double paramAtBase = tailArc.GetParameterAtPoint(trueBaseOnArc);
+
+                            double arcLength = tailArc.GetDistanceAtParameter(tailArc.EndParam);
+                            if (arcLength > arrowLength)
+                            {
+                                try
+                                {
+                                    if (tailArc.StartPoint.DistanceTo(_p1) < tailArc.EndPoint.DistanceTo(_p1))
+                                    {
+                                        tailArc.StartAngle = paramAtBase;
+                                    }
+                                    else
+                                    {
+                                        tailArc.EndAngle = paramAtBase;
+                                    }
+                                    draw.Geometry.Draw(tailArc);
+                                }
+                                catch { }
+                            }
+                        }
                     }
                 }
 
-                // ── 2. Draw tail arc preview ───────────────────────────────────────────────
-                using (var tailArc = ArcLeaderGeometryService.CreateTailArc(_p2, tailArcEnd, mainArcRadius))
-                {
-                    if (tailArc != null)
-                        draw.Geometry.Draw(tailArc);
-                }
-
-                // ── 3. Draw arrowhead tangent indicator ───────────────────────────────────
-                var arrowDir = new Vector3d(Math.Cos(tangentAngle), Math.Sin(tangentAngle), 0).GetNormal()
-                               * (_settings.TextHeight * 5);
-                draw.Geometry.WorldLine(_p1, _p1 + arrowDir);
-
-                // ── 4. Draw text box preview ───────────────────────────────────────────────
+                // ── 4. Text box (same as V1) ──────────────────────────────────────────────
                 using (var mtext = ArcLeaderBoxService.CreateBox(_p3, _settings.DefaultText, _settings))
                 {
                     if (mtext != null)

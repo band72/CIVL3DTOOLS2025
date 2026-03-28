@@ -38,7 +38,7 @@ namespace RCS.CustomLeader.AutoCAD.Commands
                 if (p3Res.Status != PromptStatus.OK) return;
 
                 // 4. Ask for Text (Default to INTEX)
-                var strRes = ed.GetString(new PromptStringOptions("\nEnter text: ") { DefaultValue = settings.DefaultText });
+                var strRes = ed.GetString(new PromptStringOptions("\nEnter text: "));
                 if (strRes.Status != PromptStatus.OK) return;
 
                 // 5. Build and Save

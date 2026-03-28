@@ -70,11 +70,51 @@ namespace RCS.CustomLeader.Core.Geometry
             }
         }
 
-        public static double GetStartTangentAngle(Arc arc)
+        public static double GetTangentAngleAt(Arc arc, Point3d tipPoint)
         {
-            var plane      = new Plane(arc.Center, arc.Normal);
-            var firstDeriv = arc.GetFirstDerivative(arc.StartParam);
-            return firstDeriv.AngleOnPlane(plane);
+            Point3d ptOnCurve = arc.GetClosestPointTo(tipPoint, false);
+            double param = arc.GetParameterAtPoint(ptOnCurve);
+            var firstDeriv = arc.GetFirstDerivative(param);
+
+            // If the tip is at the EndPoint, the derivative points OUT of the curve.
+            // We want the tangent pointing INWARD along the arc path.
+            if (ptOnCurve.DistanceTo(arc.EndPoint) < ptOnCurve.DistanceTo(arc.StartPoint))
+            {
+                firstDeriv = firstDeriv.Negate();
+            }
+
+            return new Vector2d(firstDeriv.X, firstDeriv.Y).Angle;
+        }
+
+        public static double GetChordAngleAt(Arc arc, Point3d tipPoint, double distance)
+        {
+            Point3d ptOnCurve = arc.GetClosestPointTo(tipPoint, false);
+            
+            double param = arc.GetParameterAtPoint(ptOnCurve);
+            double distAtPt = arc.GetDistanceAtParameter(param);
+            double totalDist = arc.GetDistanceAtParameter(arc.EndParam);
+            
+            double targetDist;
+            if (ptOnCurve.DistanceTo(arc.StartPoint) < ptOnCurve.DistanceTo(arc.EndPoint))
+            {
+                targetDist = distAtPt + distance;
+                if (targetDist > totalDist) targetDist = totalDist;
+            }
+            else
+            {
+                targetDist = distAtPt - distance;
+                if (targetDist < 0) targetDist = 0;
+            }
+            
+            Point3d ptBase = arc.GetPointAtDist(targetDist);
+            Vector3d chordDir = ptBase - ptOnCurve;
+            
+            if (chordDir.Length < 1e-6)
+            {
+                return GetTangentAngleAt(arc, tipPoint);
+            }
+            
+            return new Vector2d(chordDir.X, chordDir.Y).Angle;
         }
 
         public static Entity CreateHeadBlock(Point3d position, double tangentAngle, ArcLeaderSettings settings)
