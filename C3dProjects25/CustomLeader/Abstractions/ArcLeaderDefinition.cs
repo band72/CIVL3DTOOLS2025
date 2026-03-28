@@ -12,6 +12,7 @@ namespace RCS.CustomLeader.Abstractions
 
         // Component Handles / IDs
         public ObjectId ArcId { get; set; }
+        public ObjectId TailArcId { get; set; }   // V2 only: secondary tail arc
         public ObjectId HeadBlockId { get; set; }
         public ObjectId TextId { get; set; }
         public ObjectId FrameId { get; set; }
