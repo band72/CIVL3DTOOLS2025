@@ -2,6 +2,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
+using Autodesk.Civil.ApplicationServices;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace RCS.C3D2025.Tools
@@ -69,6 +70,69 @@ namespace RCS.C3D2025.Tools
                 "\n  RCS_ARCLEADER                 Create an arc leader annotation" +
                 "\n  RCS_ARCLEADER_TEXTSIZE        Set the arc leader text size" +
                 "\n  RCS_PRINT_MULTI_SHEETS        Batch print layouts to a single multi-page PDF");
+        }
+        [CommandMethod("RCS_SET_FL83EF")]
+        public void SetFlCoordinateSystem()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            if (doc == null) return;
+            var ed = doc.Editor;
+            try
+            {
+                // Step 1: Set via Civil 3D Settings API
+                try
+                {
+                    var civDoc = CivilApplication.ActiveDocument;
+                    if (civDoc != null)
+                    {
+                        var uzs = civDoc.Settings.DrawingSettings.UnitZoneSettings;
+                        ed.WriteMessage($"\n[RCS] Current CRS: '{uzs.CoordinateSystemCode}'");
+                        uzs.CoordinateSystemCode = "FL83E-SF";
+                        ed.WriteMessage($"\n[RCS] CRS set to: '{uzs.CoordinateSystemCode}'");
+                    }
+                    else { ed.WriteMessage("\n[RCS] WARN: CivilDocument null — fallback to MAPCSASSIGN."); }
+                }
+                catch (System.Exception ex) { ed.WriteMessage($"\n[RCS] WARN Civil API: {ex.Message}"); }
+
+                // Step 2: Fallback via command string
+                doc.SendStringToExecute("MAPCSASSIGN FL83E-SF \n", true, false, true);
+
+                // Step 3: Turn on aerial imagery
+                doc.SendStringToExecute("GEOMAP Aerial \n", true, false, true);
+
+                ed.WriteMessage("\n[RCS] FL83E-SF applied. Aerial imagery queued.");
+            }
+            catch (System.Exception ex) { ed.WriteMessage($"\n[RCS ERROR] {ex.Message}"); }
+        }
+
+        [CommandMethod("RCS_DIAG_CRS")]
+        public void DiagnoseCrs()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            if (doc == null) return;
+            var ed = doc.Editor;
+            try
+            {
+                var civDoc = CivilApplication.ActiveDocument;
+                if (civDoc == null) { ed.WriteMessage("\n[DIAG] CivilDocument = NULL"); return; }
+                var uzs = civDoc.Settings.DrawingSettings.UnitZoneSettings;
+                ed.WriteMessage($"\n[DIAG] CoordinateSystemCode = '{uzs.CoordinateSystemCode}'");
+            }
+            catch (System.Exception ex) { ed.WriteMessage($"\n[DIAG] Exception: {ex.Message}"); }
+        }
+        [CommandMethod("RCS_HELP")]
+        public void ShowHelp()
+        {
+            try
+            {
+                var win = new HelpWindow();
+                Application.ShowModalWindow(win);
+            }
+            catch (System.Exception ex)
+            {
+                var doc = Application.DocumentManager.MdiActiveDocument;
+                doc?.Editor.WriteMessage($"\nFailed to launch Help window: {ex.Message}");
+            }
         }
     }
 }
