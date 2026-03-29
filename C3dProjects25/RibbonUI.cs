@@ -105,6 +105,7 @@ namespace RCS.C3D2025.Tools
                 AddRibbonButton(draftPanel.Source, "ArcLeader",      "RCS_ARCLEADER ",                btnIdx++);
                 AddRibbonButton(draftPanel.Source, "ArcLeader V2",   "RCS_ARCLEADER_V2 ",             btnIdx++);
                 AddRibbonButton(draftPanel.Source, "Text Size",      "RCS_ARCLEADER_TEXTSIZE ",       btnIdx++);
+                AddRibbonButton(draftPanel.Source, "Set FL CRS",     "RCS_SET_FL83EF ",               btnIdx++);
                 AddRibbonButton(draftPanel.Source, "Print Sheets",   "RCS_PRINT_MULTI_SHEETS ",       btnIdx++);
 
                 // --- PANEL: Help ---
