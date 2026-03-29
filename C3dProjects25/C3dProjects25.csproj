@@ -73,11 +73,11 @@
     <Message Importance="high" Text="Copying plugin to civil3d2025.bundle..." />
 
     <!-- 1. Stage DLL + PackageContents into the repo bundle folder -->
-    <MakeDir Directories="$(ProjectDir)..\applicatoinplugin\civil3d2025.bundle\Contents" />
+    <MakeDir Directories="$(ProjectDir)..\applicationplugin\civil3d2025.bundle\Contents" />
     <Copy SourceFiles="$(TargetPath)"
-          DestinationFolder="$(ProjectDir)..\applicatoinplugin\civil3d2025.bundle\Contents" />
-    <Copy SourceFiles="$(ProjectDir)..\applicatoinplugin\civil3d2025.bundle\PackageContents.xml"
-          DestinationFolder="$(ProjectDir)..\applicatoinplugin\civil3d2025.bundle"
+          DestinationFolder="$(ProjectDir)..\applicationplugin\civil3d2025.bundle\Contents" />
+    <Copy SourceFiles="$(ProjectDir)..\applicationplugin\civil3d2025.bundle\PackageContents.xml"
+          DestinationFolder="$(ProjectDir)..\applicationplugin\civil3d2025.bundle"
           SkipUnchangedFiles="true" />
 
     <!-- 2. Deploy to %APPDATA%\Autodesk\ApplicationPlugins so Civil 3D auto-loads on startup -->
@@ -87,7 +87,7 @@
     <MakeDir Directories="$(BundleDeploy)\Contents" />
     <Copy SourceFiles="$(TargetPath)"
           DestinationFolder="$(BundleDeploy)\Contents" />
-    <Copy SourceFiles="$(ProjectDir)..\applicatoinplugin\civil3d2025.bundle\PackageContents.xml"
+    <Copy SourceFiles="$(ProjectDir)..\applicationplugin\civil3d2025.bundle\PackageContents.xml"
           DestinationFolder="$(BundleDeploy)"
           SkipUnchangedFiles="false" />
 
