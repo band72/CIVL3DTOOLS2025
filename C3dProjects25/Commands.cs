@@ -87,20 +87,17 @@ namespace RCS.C3D2025.Tools
                     {
                         var uzs = civDoc.Settings.DrawingSettings.UnitZoneSettings;
                         ed.WriteMessage($"\n[RCS] Current CRS: '{uzs.CoordinateSystemCode}'");
-                        uzs.CoordinateSystemCode = "FL83E-SF";
+                        uzs.CoordinateSystemCode = "FL83-EF";
                         ed.WriteMessage($"\n[RCS] CRS set to: '{uzs.CoordinateSystemCode}'");
                     }
-                    else { ed.WriteMessage("\n[RCS] WARN: CivilDocument null — fallback to MAPCSASSIGN."); }
+                    else { ed.WriteMessage("\n[RCS] WARN: CivilDocument null."); }
                 }
                 catch (System.Exception ex) { ed.WriteMessage($"\n[RCS] WARN Civil API: {ex.Message}"); }
 
-                // Step 2: Fallback via command string
-                doc.SendStringToExecute("MAPCSASSIGN FL83E-SF \n", true, false, true);
+                // Activate aerial imagery — send keyword on its own line, no trailing space
+                doc.SendStringToExecute("GEOMAP\nAerial\n", true, false, true);
 
-                // Step 3: Turn on aerial imagery
-                doc.SendStringToExecute("GEOMAP Aerial \n", true, false, true);
-
-                ed.WriteMessage("\n[RCS] FL83E-SF applied. Aerial imagery queued.");
+                ed.WriteMessage("\n[RCS] FL83-EF applied. Aerial imagery queued.");
             }
             catch (System.Exception ex) { ed.WriteMessage($"\n[RCS ERROR] {ex.Message}"); }
         }
