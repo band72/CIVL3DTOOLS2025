@@ -16,11 +16,13 @@ namespace RCS.C3D2025.Tools
             new Dictionary<string, (string, string)>(StringComparer.OrdinalIgnoreCase)
             {
                 { "FOUND NAIL & DISK*", ("NAIL&DISK\\P FOUND","NAIL&DISK \\P FND") },
-                { "NDF*", ("NAIL&DISK\\P FOUND","NAIL&DISK \\P FND") },
-                { "IRS*", ("SIR", "SIR ") },
-                { "IRF*", ("FIR", "FIR ") },
-                { "IPS*", ("SIP", "SIP ") },
-                { "IPF*", ("FIP", "FIP ") },
+                { "NDF", ("NAIL&DISK\\P FOUND","NAIL&DISK \\P FND") },
+                { "SIP", ( "SIP 1/2 \\P (LB8484) ", "SIP 1/2 \\P (LB8484) ") },
+                { "IPS", ( "SIP 1/2 \\P (LB8484) " , "SIP 1/2 \\P IP (LB8484) ") },
+                { "IRS*", ( "SIR 1/2 \\P (LB8484) ", "SIR 1/2 \\P IR (LB8484) ") },
+                { "IRF*", ( "FIR 1/2 \\P (NO-ID) ", "FIR 1/2 \\P IR (NO-ID) ") },
+                { "IPS*", ( "SIP 1/2 \\P (LB8484) ", "SIP 1/2 \\P IP (LB8484) ") },
+                { "IPF*", ( "FIP 1/2 \\P (NO-ID) ", "FIP 1/2 \\P IP (NO-ID) ") },
                 { "CMF", ("CMF 4X4 (NO-ID)", "CMF 4X4 \\P (NO-ID)") },
                 { "15RCP", ("RCP", "Reinforced Concrete Pipe") },
                 { "18CMP", ("CMP", "Corrugated Metal Pipe") },
@@ -320,6 +322,10 @@ namespace RCS.C3D2025.Tools
                                 }
                                 else
                                 {
+                                    // Diagnostic: show exact bytes so invisible chars are visible
+                                    byte[] _diagBytes = System.Text.Encoding.UTF8.GetBytes(searchKey);
+                                    string hexDump = string.Join(" ", Array.ConvertAll(_diagBytes, b => b.ToString("X2")));
+                                    ed.WriteMessage($"\n  [NO-MATCH] pt#{point.PointNumber} raw=\"{searchKey}\" len={searchKey.Length} hex=[{hexDump}]");
                                     cntSkip++;
                                 }
                             }

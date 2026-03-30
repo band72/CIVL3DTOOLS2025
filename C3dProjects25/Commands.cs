@@ -5,6 +5,31 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.Civil.ApplicationServices;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.Tools.Commands))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.Tools.DescKeyScaleCommands))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RcsTools.ExportDescriptionKeysCommand))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(C3dProjects25.RcsImportPointStylesNet8))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.RcsApplyTemplate))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RcsTools.CaptureMeasOsmCommand))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.Tools.ConvertCogoCodesCommand))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.RcsDeleteAllPointStylesNet8))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.RCS_DescKeySet_ImpExp))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.RcsDiagPointStyleSetters))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.RcsPointStyleExportDeleteImport))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.RCS_PointStyle_BlockMarkerMatch))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.RCS_PointStyleLayerPolicy))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.RCS_PointStyle_ByLayerComponents))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.RCS_PointStyle_DescKeyLayerApply))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.Tools.PrintLayoutsCommand))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.QA.RcsQaMaster))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(Civil3D_SymbolTable.Commands))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(Civil3D_SymbolTable.RCS_SymbolTableRobust))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(C3dProjects25.Tables.RcsTableCommands))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2026.RCS_Blocks_ToLayer0))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.CustomLeader.AutoCAD.Commands.CreateArcLeaderCommand))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.CustomLeader.AutoCAD.Commands.CreateArcLeaderV2Command))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.CustomLeader.AutoCAD.Commands.SetArcLeaderTextSizeCommand))]
+
 namespace RCS.C3D2025.Tools
 {
     public class Commands : IExtensionApplication
