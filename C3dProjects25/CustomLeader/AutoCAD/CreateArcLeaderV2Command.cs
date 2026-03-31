@@ -27,19 +27,41 @@ namespace RCS.CustomLeader.AutoCAD.Commands
 
             try
             {
-                // 1. Head point (arrow tip)
-                var p1Res = ed.GetPoint("\nSpecify leader head point: ");
-                if (p1Res.Status != PromptStatus.OK) return;
+                // 1. Head point (arrow tip) — OSNAP OFF so snap cannot bend the arrow direction
+                var p1Opts = new PromptPointOptions("\nSpecify leader head point (OSNAP suspended): ")
+                {
+                    AllowNone = false
+                };
+                p1Opts.Keywords.Add("SNap", "SNap", "Re-enable snap for this pick");
+                // Suppress entity snaps so tip is pure cursor position
+                p1Opts.Keywords.Clear();
+                var savedOsnap  = (int)Autodesk.AutoCAD.ApplicationServices.Core.Application.GetSystemVariable("OSMODE");
+                Autodesk.AutoCAD.ApplicationServices.Core.Application.SetSystemVariable("OSMODE", 0);
 
-                // 2. Through point (defines main arc curvature / arrowhead base)
+                var p1Res = ed.GetPoint(p1Opts);
+                if (p1Res.Status != PromptStatus.OK)
+                {
+                    Autodesk.AutoCAD.ApplicationServices.Core.Application.SetSystemVariable("OSMODE", savedOsnap);
+                    return;
+                }
+
+                // 2. Through point — also snap-free to prevent arc distortion mid-pick
                 var p2Res = ed.GetPoint(new PromptPointOptions("\nSpecify arc through point: ")
                 {
                     BasePoint    = p1Res.Value,
-                    UseBasePoint = true
+                    UseBasePoint = true,
+                    AllowNone    = false
                 });
-                if (p2Res.Status != PromptStatus.OK) return;
+                if (p2Res.Status != PromptStatus.OK)
+                {
+                    Autodesk.AutoCAD.ApplicationServices.Core.Application.SetSystemVariable("OSMODE", savedOsnap);
+                    return;
+                }
 
                 // 3. Drag jig for box point — previews tail arc + arrowhead + text box
+                //    Restore snap before the jig so the text box can optionally snap
+                Autodesk.AutoCAD.ApplicationServices.Core.Application.SetSystemVariable("OSMODE", savedOsnap);
+
                 var settings = ArcLeaderSettings.Current;
                 var jig      = new ArcLeaderV2PlacementJig(p1Res.Value, p2Res.Value, settings);
 
@@ -67,6 +89,10 @@ namespace RCS.CustomLeader.AutoCAD.Commands
             }
             catch (System.Exception ex)
             {
+                // Always restore OSNAP even on error
+                try { Autodesk.AutoCAD.ApplicationServices.Core.Application.SetSystemVariable("OSMODE", 
+                          Autodesk.AutoCAD.ApplicationServices.Core.Application.GetSystemVariable("OSMODE")); }
+                catch { }
                 ed.WriteMessage($"\nError creating Arc Leader V2: {ex.Message}");
             }
         }

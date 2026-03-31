@@ -152,26 +152,25 @@ namespace RCS.CustomLeader.Core.Builders
                     if (!string.IsNullOrWhiteSpace(settings.TextLayer))
                         mtext.Layer = settings.TextLayer;
 
-                    def.TextId = btr.AppendEntity(mtext);
-                    tr.AddNewlyCreatedDBObject(mtext, true);
-
+                    // TRIM FIRST so the tailArc clone inherits the trimmed angles
                     if (arc != null)
                         ArcLeaderBoxService.TrimArcToMText(arc, mtext, settings);
+
+                    def.TextId = btr.AppendEntity(mtext);
+                    tr.AddNewlyCreatedDBObject(mtext, true);
                 }
 
                 // ── Step 4: Second arc (V2 addition) ─────────────────────────────────────
-                // arrowBase = back end of the arrowhead solid
-                // firstArcEnd = the trimmed endpoint of the main arc closest to p3 (text box)
-                // secondArc = arrowBase → chord-midpoint (slight perpendicular offset) → firstArcEnd
+                // Clone is made AFTER trim so the tail arc already has the correct end angle.
                 if (arc != null)
                 {
                     double  arrowLength = settings.TextHeight * 1.5;
                     var     tangentDir  = new Vector3d(Math.Cos(tangentAngle), Math.Sin(tangentAngle), 0);
                     Point3d arrowBase   = p1 + tangentDir * arrowLength;
 
-                    // Build second arc: perfectly traces the first arc (same circle)
+                    // Clone the already-trimmed arc so StartAngle/EndAngle are final
                     Arc tailArc = (Arc)arc.Clone();
-                    
+
                     // Find the exact point on the circle closest to the arrowhead base
                     Point3d trueBaseOnArc = tailArc.GetClosestPointTo(arrowBase, false);
                     double paramAtBase = tailArc.GetParameterAtPoint(trueBaseOnArc);
@@ -179,7 +178,7 @@ namespace RCS.CustomLeader.Core.Builders
                     double arcLength = tailArc.GetDistanceAtParameter(tailArc.EndParam);
                     if (arcLength <= arrowLength)
                     {
-                        // The entire arc is physically covered by the solid arrowhead.
+                        // Entire arc is covered by the solid arrowhead — skip tail
                         tailArc.Dispose();
                         tailArc = null;
                     }
@@ -188,13 +187,9 @@ namespace RCS.CustomLeader.Core.Builders
                         try
                         {
                             if (tailArc.StartPoint.DistanceTo(p1) < tailArc.EndPoint.DistanceTo(p1))
-                            {
                                 tailArc.StartAngle = paramAtBase;
-                            }
                             else
-                            {
                                 tailArc.EndAngle = paramAtBase;
-                            }
                         }
                         catch
                         {
@@ -202,6 +197,7 @@ namespace RCS.CustomLeader.Core.Builders
                             tailArc = null;
                         }
                     }
+
                     if (tailArc != null)
                     {
                         if (!string.IsNullOrWhiteSpace(settings.ArcLayer))
