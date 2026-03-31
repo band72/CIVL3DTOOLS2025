@@ -15,10 +15,10 @@ namespace RCS.C3D2025.Tools
         private static readonly Dictionary<string, (string MasterCode, string MasterDesc)> _codeMap =
             new Dictionary<string, (string, string)>(StringComparer.OrdinalIgnoreCase)
             {
-                { "FND5/8IRNOID", ("FIR 5/8 \\P (NO-ID)","FIR 5/8 \\P (NO-ID)") },
-                { "FND1/2IRNOID", ("FIP 1/2 \\P (NO-ID)","FIP 1/2 \\P (NO-ID)") },
-                { "FND5/8IPNOID", ("FIP 5/8 \\P (NO-ID)","FIP 5/8 \\P (NO-ID)") },
-                { "FND1/2IPNOID", ("FIP 1/2 \\P (NO-ID)","FIP 1/2 \\P (NO-ID)") },
+                { "FIP5/8IRNOID", ("FIR 5/8 \\P (NO-ID)","FIR 5/8 \\P (NO-ID)") },
+                { "FIR1/2IRNOID", ("FIP 1/2 \\P (NO-ID)","FIR 1/2 \\P (NO-ID)") },
+                { "FIR5/8IPNOID", ("FIR 5/8 \\P (NO-ID)","FIR 5/8 \\P (NO-ID)") },
+                { "FIP1/2IPNOID", ("FIP 1/2 \\P (NO-ID)","FIP 1/2 \\P (NO-ID)") },
                 { "FOUND NAIL & DISK*", ("NAIL&DISK\\P FOUND","NAIL&DISK \\P FND") },
                 { "NDF", ("NAIL&DISK\\P FOUND","NAIL&DISK \\P FND") },
                 { "SIP", ( "SIP 1/2 \\P (LB8484) ", "SIP 1/2 \\P (LB8484) ") },
