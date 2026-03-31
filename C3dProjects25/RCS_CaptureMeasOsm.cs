@@ -47,7 +47,7 @@ namespace RCS.C3D2025.Tools
                 {
                     ss = psr.Value;
                 }
-                else if (psr.Status == PromptStatus.None)
+                else if (psr.Status == PromptStatus.Error)
                 {
                     // Enter pressed with no selection → capture ALL
                     PromptSelectionResult allPsr = ed.SelectAll(filter);
@@ -71,9 +71,10 @@ namespace RCS.C3D2025.Tools
 
                 // 2. Resolve output path — same folder as the DWG, or Documents as fallback
                 string dwgPath  = doc.Name;
+                string fallbackDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 string outDir   = (!string.IsNullOrEmpty(dwgPath) && Path.IsPathRooted(dwgPath))
-                                    ? Path.GetDirectoryName(dwgPath)
-                                    : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                                    ? (Path.GetDirectoryName(dwgPath) ?? fallbackDir)
+                                    : fallbackDir;
 
                 string dwgName  = (!string.IsNullOrEmpty(dwgPath))
                                     ? Path.GetFileNameWithoutExtension(dwgPath)
@@ -101,12 +102,17 @@ namespace RCS.C3D2025.Tools
 
                         string rawDesc = pt.RawDescription ?? string.Empty;
 
+                        // Guard Civil 3D's sentinel value for "no elevation"
+                        double elev = (pt.Elevation == double.MinValue || double.IsNaN(pt.Elevation))
+                                        ? 0.0
+                                        : pt.Elevation;
+
                         rows.Add(string.Format("{0}\t{1}\t{2:F4}\t{3:F4}\t{4:F4}",
                             pt.PointNumber,
                             rawDesc.Replace("\t", " "),
                             pt.Northing,
                             pt.Easting,
-                            pt.Elevation));
+                            elev));
 
                         captured++;
                     }
@@ -125,7 +131,8 @@ namespace RCS.C3D2025.Tools
             }
             catch (System.Exception ex)
             {
-                ed.WriteMessage($"\nError in RCS_CAPTURE_MEAS_OSM: {ex.Message}");
+                Editor safeEd = Application.DocumentManager.MdiActiveDocument?.Editor;
+                safeEd?.WriteMessage($"\nError in RCS_CAPTURE_MEAS_OSM: {ex.Message}");
             }
         }
     }
