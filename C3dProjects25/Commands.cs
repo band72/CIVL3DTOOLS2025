@@ -91,8 +91,10 @@ namespace RCS.C3D2025.Tools
                 "\n\n--- Drafting Utilities ---" +
                 "\n  RCS_SET_ALL_BLOCKS_TO_LAYER0  Move all blocks to Layer 0" +
                 "\n  RCS_CONVERT_COGO_CODES        Batch convert COGO raw descriptions to master codes" +
+                "\n  RCS_CAPTURE_MEAS_OSM          Export COGO point OSM field capture report (tab-delimited .txt)" +
                 "\n  RCS_APPLY_TEMPLATE            Apply a drawing template" +
                 "\n  RCS_ARCLEADER                 Create an arc leader annotation" +
+                "\n  RCS_ARCLEADER_V2              Create an arc leader V2 (tail arc + trimmed to text box)" +
                 "\n  RCS_ARCLEADER_TEXTSIZE        Set the arc leader text size" +
                 "\n  RCS_PRINT_MULTI_SHEETS        Batch print layouts to a single multi-page PDF");
         }
