@@ -25,6 +25,10 @@ namespace RCS.CustomLeader.AutoCAD.Commands
             var ed  = doc.Editor;
             var db  = doc.Database;
 
+            // Save and suppress OSNAP before entering the try block so catch can always restore it
+            int savedOsnap = Convert.ToInt32(
+                Autodesk.AutoCAD.ApplicationServices.Core.Application.GetSystemVariable("OSMODE"));
+
             try
             {
                 // 1. Head point (arrow tip) — OSNAP OFF so snap cannot bend the arrow direction
@@ -32,10 +36,6 @@ namespace RCS.CustomLeader.AutoCAD.Commands
                 {
                     AllowNone = false
                 };
-                p1Opts.Keywords.Add("SNap", "SNap", "Re-enable snap for this pick");
-                // Suppress entity snaps so tip is pure cursor position
-                p1Opts.Keywords.Clear();
-                var savedOsnap  = (int)Autodesk.AutoCAD.ApplicationServices.Core.Application.GetSystemVariable("OSMODE");
                 Autodesk.AutoCAD.ApplicationServices.Core.Application.SetSystemVariable("OSMODE", 0);
 
                 var p1Res = ed.GetPoint(p1Opts);
@@ -90,8 +90,7 @@ namespace RCS.CustomLeader.AutoCAD.Commands
             catch (System.Exception ex)
             {
                 // Always restore OSNAP even on error
-                try { Autodesk.AutoCAD.ApplicationServices.Core.Application.SetSystemVariable("OSMODE", 
-                          Autodesk.AutoCAD.ApplicationServices.Core.Application.GetSystemVariable("OSMODE")); }
+                try { Autodesk.AutoCAD.ApplicationServices.Core.Application.SetSystemVariable("OSMODE", savedOsnap); }
                 catch { }
                 ed.WriteMessage($"\nError creating Arc Leader V2: {ex.Message}");
             }
