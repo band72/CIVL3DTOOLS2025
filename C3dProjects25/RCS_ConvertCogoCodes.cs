@@ -193,7 +193,7 @@ namespace RCS.C3D2025.Tools
                 {
                     ss = psr.Value;
                 }
-                else if (psr.Status == PromptStatus.None)
+                else if (psr.Status == PromptStatus.Error)
                 {
                     // User pressed Enter without selection -> Process ALL COGO points
                     PromptSelectionResult allPsr = ed.SelectAll(filter);
