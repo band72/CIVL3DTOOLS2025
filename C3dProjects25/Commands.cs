@@ -6,6 +6,7 @@ using Autodesk.Civil.ApplicationServices;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.Tools.Commands))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.Tools.LocalizeCommand))]
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.Tools.DescKeyScaleCommands))]
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RcsTools.ExportDescriptionKeysCommand))]
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(C3dProjects25.RcsImportPointStylesNet8))]

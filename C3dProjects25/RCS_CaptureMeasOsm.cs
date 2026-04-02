@@ -1,138 +1,306 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+using System.Collections;
 using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
-using Autodesk.Civil.DatabaseServices;
-using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
+using Exception = System.Exception;
 
 namespace RCS.C3D2025.Tools
 {
-    /// <summary>
-    /// RCS_CAPTURE_MEAS_OSM
-    /// Captures Original Survey Measurements (OSM) from selected COGO points and exports
-    /// a tab-delimited field capture report: Point#, RawDesc, Northing, Easting, Elevation.
-    /// Output is written to the same directory as the current drawing.
-    /// </summary>
     public class CaptureMeasOsmCommand
     {
         [CommandMethod("RCS_CAPTURE_MEAS_OSM")]
         public void CaptureMeasOsm()
         {
-            Document doc = Application.DocumentManager.MdiActiveDocument;
-            if (doc == null) return;
-
-            Editor ed = doc.Editor;
-            Database db = doc.Database;
-
+            Document mdiActiveDocument = Application.DocumentManager.MdiActiveDocument;
+            if (mdiActiveDocument == null)
+            {
+                return;
+            }
+            Database database = mdiActiveDocument.Database;
+            Editor editor = mdiActiveDocument.Editor;
+            string currentLayout = LayoutManager.Current.CurrentLayout;
+            string bestLayoutName = null;
             try
             {
-                // 1. Select COGO points (or Enter for ALL)
-                PromptSelectionOptions pso = new PromptSelectionOptions
+                using (DocumentLock val = mdiActiveDocument.LockDocument())
                 {
-                    MessageForAdding = "\nSelect COGO points to capture (Enter = ALL): ",
-                    AllowDuplicates  = false
-                };
-
-                TypedValue[]    filterValues = { new TypedValue((int)DxfCode.Start, "AECC_COGO_POINT") };
-                SelectionFilter filter       = new SelectionFilter(filterValues);
-
-                PromptSelectionResult psr = ed.GetSelection(pso, filter);
-
-                SelectionSet ss;
-                if (psr.Status == PromptStatus.OK)
-                {
-                    ss = psr.Value;
-                }
-                else if (psr.Status == PromptStatus.Error)
-                {
-                    // Enter pressed with no selection → capture ALL
-                    PromptSelectionResult allPsr = ed.SelectAll(filter);
-                    if (allPsr.Status != PromptStatus.OK)
+                    ObjectId layerId = EnsureLayer(database, "image-0");
+                    SetCurrentLayer(database, layerId);
+                    Extents3d layerExtents = GetLayerExtents(database, "measpl", "pl");
+                    Point3d minPoint = layerExtents.MinPoint;
+                    double num = minPoint.DistanceTo(layerExtents.MaxPoint);
+                    Tolerance global = Tolerance.Global;
+                    if (num < global.EqualPoint)
                     {
-                        ed.WriteMessage("\nNo COGO points found in drawing.");
+                        editor.WriteMessage("\nNo measurable extents found on layers \"measpl\" or \"pl\".");
                         return;
                     }
-                    ss = allPsr.Value;
-                }
-                else
-                {
-                    return; // Cancelled
-                }
-
-                if (ss == null || ss.Count == 0)
-                {
-                    ed.WriteMessage("\nNo COGO points selected.");
-                    return;
-                }
-
-                // 2. Resolve output path — same folder as the DWG, or Documents as fallback
-                string dwgPath  = doc.Name;
-                string fallbackDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                string outDir   = (!string.IsNullOrEmpty(dwgPath) && Path.IsPathRooted(dwgPath))
-                                    ? (Path.GetDirectoryName(dwgPath) ?? fallbackDir)
-                                    : fallbackDir;
-
-                string dwgName  = (!string.IsNullOrEmpty(dwgPath))
-                                    ? Path.GetFileNameWithoutExtension(dwgPath)
-                                    : "Drawing";
-
-                string outFile  = Path.Combine(outDir, $"{dwgName}_OSM_Capture_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
-
-                // 3. Read points inside a transaction
-                var rows = new List<string>
-                {
-                    "PointNo\tRawDescription\tNorthing\tEasting\tElevation"
-                };
-
-                int captured = 0;
-                int skipped  = 0;
-
-                using (Transaction tr = db.TransactionManager.StartTransaction())
-                {
-                    foreach (SelectedObject selObj in ss)
+                    ObjectId largestViewportAcrossAllLayouts = GetLargestViewportAcrossAllLayouts(database, currentLayout, out bestLayoutName);
+                    if (largestViewportAcrossAllLayouts.IsNull)
                     {
-                        if (selObj == null) continue;
+                        editor.WriteMessage("\nNo floating viewports found in the '8.5x11' layout.");
+                        return;
+                    }
+                    editor.WriteMessage($"\nAutomatically locked onto floating viewport '{largestViewportAcrossAllLayouts.Handle}' located on layout '{bestLayoutName}'.");
+                    LayoutManager.Current.CurrentLayout = "Model";
+                    SetWorldPlanView(editor);
+                    ZoomToExtents(editor, layerExtents, 1.08);
+                    SetCurrentLayer(database, layerId);
+                    try
+                    {
+                        editor.Command("_.GEOMAP", "openstreetMap");
+                    }
+                    catch
+                    {
+                        editor.Command("\u0003");
+                    }
+                    try
+                    {
+                        editor.Command("_.GEOMAPIMAGE", "_Viewport");
+                    }
+                    catch
+                    {
+                        editor.Command("\u0003");
+                    }
+                    LayoutManager.Current.CurrentLayout = bestLayoutName;
+                    ActivateViewportAndFreezeAllBut(database, editor, largestViewportAcrossAllLayouts, "image-0", layerExtents);
+                    editor.SwitchToPaperSpace();
+                    database.SaveAs(mdiActiveDocument.Name, true, (DwgVersion)33, mdiActiveDocument.Database.SecurityParameters);
+                    editor.WriteMessage("\nDone. Captured map to layer \"image-0\", updated viewport, and saved drawing.");
+                }
+            }
+            catch (Exception ex)
+            {
+                editor.WriteMessage("\nError: " + ex.Message);
+            }
+            finally
+            {
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(bestLayoutName))
+                    {
+                        LayoutManager.Current.CurrentLayout = bestLayoutName;
+                        editor.SwitchToPaperSpace();
+                    }
+                }
+                catch
+                {
+                }
+            }
+        }
 
-                        CogoPoint pt = tr.GetObject(selObj.ObjectId, OpenMode.ForRead) as CogoPoint;
-                        if (pt == null) { skipped++; continue; }
+        private static ObjectId EnsureLayer(Database db, string layerName)
+        {
+            using (Transaction val = db.TransactionManager.StartTransaction())
+            {
+                LayerTable val2 = (LayerTable)val.GetObject(db.LayerTableId, OpenMode.ForRead);
+                if (val2.Has(layerName))
+                {
+                    ObjectId result = val2[layerName];
+                    val.Commit();
+                    return result;
+                }
+                val2.UpgradeOpen();
+                LayerTableRecord val3 = new LayerTableRecord
+                {
+                    Name = layerName
+                };
+                ObjectId result2 = val2.Add(val3);
+                val.AddNewlyCreatedDBObject(val3, true);
+                val.Commit();
+                return result2;
+            }
+        }
 
-                        string rawDesc = pt.RawDescription ?? string.Empty;
+        private static void SetCurrentLayer(Database db, ObjectId layerId)
+        {
+            using (Transaction val = db.TransactionManager.StartTransaction())
+            {
+                db.Clayer = layerId;
+                val.Commit();
+            }
+        }
 
-                        // Guard Civil 3D's sentinel value for "no elevation"
-                        double elev = (pt.Elevation == double.MinValue || double.IsNaN(pt.Elevation))
-                                        ? 0.0
-                                        : pt.Elevation;
+        private static Extents3d GetLayerExtents(Database db, params string[] layerNames)
+        {
+            bool flag = false;
+            Extents3d result = default(Extents3d);
+            using (Transaction val = db.TransactionManager.StartTransaction())
+            {
+                BlockTable val2 = (BlockTable)val.GetObject(db.BlockTableId, OpenMode.ForRead);
+                if (!val2.Has(BlockTableRecord.ModelSpace))
+                {
+                    throw new InvalidOperationException("ModelSpace not found.");
+                }
+                BlockTableRecord val3 = (BlockTableRecord)val.GetObject(val2[BlockTableRecord.ModelSpace], OpenMode.ForRead);
+                
+                foreach (ObjectId current in val3)
+                {
+                    if (!current.IsValid || current.IsErased)
+                    {
+                        continue;
+                    }
+                    DBObject obj = val.GetObject(current, OpenMode.ForRead, false);
+                    Entity val4 = obj as Entity;
+                    if (val4 == null) continue;
+                    
+                    bool match = false;
+                    foreach(string ln in layerNames) 
+                    {
+                        if (string.Equals(val4.Layer, ln, StringComparison.OrdinalIgnoreCase)) 
+                        {
+                            match = true; 
+                            break;
+                        }
+                    }
+                    if (!match) continue;
+                    try
+                    {
+                        Extents3d geometricExtents = val4.GeometricExtents;
+                        if (!flag)
+                        {
+                            result = geometricExtents;
+                            flag = true;
+                        }
+                        else
+                        {
+                            result.AddExtents(geometricExtents);
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+                
+                val.Commit();
+                if (!flag)
+                {
+                    throw new InvalidOperationException("No entities with extents found on layers: " + string.Join(", ", layerNames) + ".");
+                }
+                return result;
+            }
+        }
 
-                        rows.Add(string.Format("{0}\t{1}\t{2:F4}\t{3:F4}\t{4:F4}",
-                            pt.PointNumber,
-                            rawDesc.Replace("\t", " "),
-                            pt.Northing,
-                            pt.Easting,
-                            elev));
-
-                        captured++;
+        private static ObjectId GetLargestViewportAcrossAllLayouts(Database db, string originalLayout, out string bestLayoutName)
+        {
+            bestLayoutName = null;
+            ObjectId result = ObjectId.Null;
+            double num = -1.0;
+            using (Transaction val = db.TransactionManager.StartTransaction())
+            {
+                DBDictionary val2 = (DBDictionary)val.GetObject(db.LayoutDictionaryId, OpenMode.ForRead);
+                bool flag = !string.Equals(originalLayout, "Model", StringComparison.OrdinalIgnoreCase) && val2.Contains(originalLayout);
+                
+                foreach (DBDictionaryEntry current in val2)
+                {
+                    if (string.Equals(current.Key, "Model", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
                     }
 
-                    tr.Commit();
+                    // Enforce using only the 8.5x11 layout
+                    if (!string.Equals(current.Key, "8.5x11", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+                    Layout val3 = (Layout)val.GetObject(current.Value, OpenMode.ForRead);
+                    foreach (ObjectId viewport in val3.GetViewports())
+                    {
+                        ObjectId val4 = viewport;
+                        if (val4.IsNull || !val4.IsValid)
+                        {
+                            continue;
+                        }
+                        DBObject obj = val.GetObject(val4, OpenMode.ForRead);
+                        Viewport val5 = obj as Viewport;
+                        if (val5 != null && val5.Number > 1 && val5.Width > 0.0 && val5.Height > 0.0)
+                        {
+                            double num2 = val5.Width * val5.Height;
+                            double num3 = (flag && string.Equals(current.Key, originalLayout, StringComparison.OrdinalIgnoreCase)) ? (num2 * 1000.0) : num2;
+                            if (val5.Handle.ToString().Equals("4F929", StringComparison.OrdinalIgnoreCase))
+                            {
+                                num3 = double.MaxValue;
+                            }
+                            if (num3 > num)
+                            {
+                                num = num3;
+                                result = val4;
+                                bestLayoutName = current.Key;
+                            }
+                        }
+                    }
                 }
-
-                // 4. Write report
-                File.WriteAllLines(outFile, rows, Encoding.UTF8);
-
-                ed.WriteMessage($"\nOSM Capture complete.");
-                ed.WriteMessage($"\n  Points captured : {captured}");
-                if (skipped > 0)
-                    ed.WriteMessage($"\n  Skipped (non-COGO): {skipped}");
-                ed.WriteMessage($"\n  Output file     : {outFile}");
+                val.Commit();
+                return result;
             }
-            catch (System.Exception ex)
+        }
+
+        private static void SetWorldPlanView(Editor ed)
+        {
+            ed.CurrentUserCoordinateSystem = Matrix3d.Identity;
+            using (ViewTableRecord currentView = ed.GetCurrentView())
             {
-                Editor safeEd = Application.DocumentManager.MdiActiveDocument?.Editor;
-                safeEd?.WriteMessage($"\nError in RCS_CAPTURE_MEAS_OSM: {ex.Message}");
+                currentView.ViewDirection = Vector3d.ZAxis;
+                currentView.ViewTwist = 0.0;
+                ed.SetCurrentView(currentView);
+            }
+        }
+
+        private static void ZoomToExtents(Editor ed, Extents3d ext, double padFactor)
+        {
+            try
+            {
+                Point3d minPoint = ext.MinPoint;
+                Point3d maxPoint = ext.MaxPoint;
+                double num = Math.Max(maxPoint.X - minPoint.X, 1.0);
+                double num2 = Math.Max(maxPoint.Y - minPoint.Y, 1.0);
+                Point2d centerPoint = new Point2d((minPoint.X + maxPoint.X) * 0.5, (minPoint.Y + maxPoint.Y) * 0.5);
+                using (ViewTableRecord currentView = ed.GetCurrentView())
+                {
+                    currentView.CenterPoint = centerPoint;
+                    currentView.Width = num * padFactor;
+                    currentView.Height = num2 * padFactor;
+                    ed.SetCurrentView(currentView);
+                }
+            }
+            catch (Exception ex)
+            {
+                ed.WriteMessage("\n[ZoomToExtents Error] " + ex.Message);
+            }
+        }
+
+        private static void ActivateViewportAndFreezeAllBut(Database db, Editor ed, ObjectId viewportId, string keepLayerName, Extents3d measExtents)
+        {
+            using (Transaction val = db.TransactionManager.StartTransaction())
+            {
+                Viewport val2 = (Viewport)val.GetObject(viewportId, OpenMode.ForWrite);
+                LayerTable val3 = (LayerTable)val.GetObject(db.LayerTableId, OpenMode.ForRead);
+                ObjectIdCollection val4 = new ObjectIdCollection();
+                foreach (ObjectId current in val3)
+                {
+                    LayerTableRecord val5 = (LayerTableRecord)val.GetObject(current, OpenMode.ForRead);
+                    if (!string.Equals(val5.Name, keepLayerName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        val4.Add(current);
+                    }
+                }
+                val.Commit();
+                
+                ed.SwitchToModelSpace();
+                using (Transaction val6 = db.TransactionManager.StartTransaction())
+                {
+                    Viewport val7 = (Viewport)val6.GetObject(viewportId, OpenMode.ForWrite);
+                    Application.SetSystemVariable("CVPORT", val7.Number);
+                    val7.Locked = false;
+                    val7.FreezeLayersInViewport(val4.GetEnumerator());
+                    val6.Commit();
+                    SetWorldPlanView(ed);
+                    ZoomToExtents(ed, measExtents, 1.05);
+                }
             }
         }
     }
