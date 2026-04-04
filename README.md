@@ -1,6 +1,5 @@
 applicationplugin/civil3d2005.bundle
-Copyright (c) 2026 [Your Name or Company]
-
+Copyright (c) 2026 Banks & Banks Consulting
 All rights reserved.
 
 Permission is hereby granted, to any person obtaining a copy
