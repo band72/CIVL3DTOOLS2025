@@ -1,4 +1,9 @@
 applicationplugin/civil3d2005.bundle
+## Download Folder 
+applicationplugin/civil3d2025.bundle
+## Install 
+To install and copy to your path. Type %appdata% in windows file explorer to see your path. 
+C:\Users\  YOUR NAME \AppData\Roaming\Autodesk\ApplicationPlugins
 
 ## License
 Copyright (c) 2026 Banks & Banks Consulting
