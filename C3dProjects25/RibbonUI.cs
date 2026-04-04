@@ -101,17 +101,20 @@ namespace RCS.C3D2025.Tools
                 AddRibbonButton(draftPanel.Source, "Blks To Layer0", "RCS_SET_ALL_BLOCKS_TO_LAYER0 ", btnIdx++);
                 AddRibbonButton(draftPanel.Source, "Convert Cogo",   "RCS_CONVERT_COGO_CODES ",       btnIdx++);
                 AddRibbonButton(draftPanel.Source, "Apply Template", "RCS_APPLY_TEMPLATE ",           btnIdx++);
-                AddRibbonButton(draftPanel.Source, "Capture OSM",    "RCS_CAPTURE_MEAS_OSM ",   btnIdx++);
-                AddRibbonButton(draftPanel.Source, "Export COGO",    "RCS_EXPORT_COGO_POINTS ",  btnIdx++);
+                AddRibbonButton(draftPanel.Source, "Capture OSM",    "RCS_CAPTURE_MEAS_OSM ",         btnIdx++);
+                AddRibbonButton(draftPanel.Source, "Export COGO",    "RCS_EXPORT_COGO_POINTS ",       btnIdx++);
                 AddRibbonButton(draftPanel.Source, "ArcLeader",      "RCS_ARCLEADER ",                btnIdx++);
                 AddRibbonButton(draftPanel.Source, "ArcLeader V2",   "RCS_ARCLEADER_V2 ",             btnIdx++);
                 AddRibbonButton(draftPanel.Source, "Text Size",      "RCS_ARCLEADER_TEXTSIZE ",       btnIdx++);
                 AddRibbonButton(draftPanel.Source, "Set FL CRS",     "RCS_SET_FL83EF ",               btnIdx++);
                 AddRibbonButton(draftPanel.Source, "Print Sheets",   "RCS_PRINT_MULTI_SHEETS ",       btnIdx++);
+                AddRibbonButton(draftPanel.Source, "Localize",       "RCS_LOCALIZE ",                 29);
+                AddRibbonButton(draftPanel.Source, "CAD Checklist",  "RCS_DRAW_CHECKLIST ",           30);
+
 
                 // --- PANEL: Help ---
                 RibbonPanel helpPanel = CreatePanel(rcsTab, "Help");
-                AddRibbonButton(helpPanel.Source, "Help Guide",      "RCS_HELP ",                     btnIdx++);
+                AddRibbonButton(helpPanel.Source, "Help Guide",      "RCS_HELP ",                     31);
 
                 _isLoaded = true;
             }

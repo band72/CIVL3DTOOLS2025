@@ -30,6 +30,7 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.CustomLeader.AutoCAD.Commands.CreateArcLeaderCommand))]
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.CustomLeader.AutoCAD.Commands.CreateArcLeaderV2Command))]
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.CustomLeader.AutoCAD.Commands.SetArcLeaderTextSizeCommand))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(C3dProjects25.RcsDrawChecklistCommand))]
 
 namespace RCS.C3D2025.Tools
 {
