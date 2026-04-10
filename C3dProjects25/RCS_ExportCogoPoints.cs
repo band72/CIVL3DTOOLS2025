@@ -13,7 +13,7 @@ namespace RCS.C3D2025.Tools
     /// <summary>
     /// RCS_EXPORT_COGO_POINTS
     /// Exports all (or selected) Civil 3D COGO points to a CSV file.
-    /// Format: PointNo,Northing,Easting,Elevation,RawDescription,FullDescription
+    /// Format: PointNo,Northing,Easting,Elevation,Description
     /// </summary>
     public class ExportCogoPointsCommand
     {
@@ -94,7 +94,7 @@ namespace RCS.C3D2025.Tools
                 int exported = 0, skipped = 0;
 
                 var sb = new StringBuilder();
-                sb.AppendLine("PointNo,Northing,Easting,Elevation,RawDescription,FullDescription");
+                sb.AppendLine("PointNo,Northing,Easting,Elevation,Description");
 
                 using (Transaction tr = db.TransactionManager.StartTransaction())
                 {
@@ -113,15 +113,13 @@ namespace RCS.C3D2025.Tools
                             double east   = pt.Easting;
                             double elev   = pt.Elevation;
                             string rawDesc  = EscapeCsv(pt.RawDescription    ?? "");
-                            string fullDesc = EscapeCsv(pt.DescriptionFormat  ?? "");
 
                             sb.AppendLine(
                                 $"{ptNo}," +
                                 $"{north:F4}," +
                                 $"{east:F4},"  +
                                 $"{elev:F4},"  +
-                                $"{rawDesc},"  +
-                                $"{fullDesc}");
+                                $"{rawDesc}");
 
                             exported++;
                         }
