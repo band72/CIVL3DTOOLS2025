@@ -15,6 +15,7 @@ namespace RCS.C3D2025.Tools
         private static readonly Dictionary<string, (string MasterCode, string MasterDesc)> _codeMap =
             new Dictionary<string, (string, string)>(StringComparer.OrdinalIgnoreCase)
             {  
+                { "FIP 5/8*", ("FIP 5/8 \\P ","FIP 5/8 \\P  ")},
                 { "FIP 1/2*", ("FIP 1/2 \\P ","FIP 1/2 \\P  ")},
                 { "FIP", ("FIP 5/8 \\P (NO-ID)","FIP 5/8 \\P (NO-ID)") },
                 { "FIR", ("FIR 5/8 \\P (NO-ID)","FIR 5/8 \\P (NO-ID)") },
