@@ -116,10 +116,10 @@ namespace RCS.C3D2025.Tools
                     newValue = "SF";
                 }
 
-                // If no symbol exists anywhere in the text, we prepend %%p 
+                // If no symbol exists anywhere in the text, we prepend \U+00B1 
                 if (!hasSymbol)
                 {
-                    newValue = "%%p " + newValue;
+                    newValue = "\\U+00B1 " + newValue;
                     hasSymbol = true; // prevent adding it twice if there are multiple matches
                 }
 
@@ -129,6 +129,11 @@ namespace RCS.C3D2025.Tools
             if (changed && replaced != text)
             {
                 newText = replaced;
+                var doc = Application.DocumentManager.MdiActiveDocument;
+                if (doc != null)
+                {
+                    doc.Editor.WriteMessage($"\n  [CleanupText] '{text.Replace("\n", "\\n")}' --> '{newText.Replace("\n", "\\n")}'");
+                }
                 return true;
             }
 
