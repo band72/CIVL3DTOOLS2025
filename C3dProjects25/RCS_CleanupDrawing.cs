@@ -87,25 +87,46 @@ namespace RCS.C3D2025.Tools
             if (string.IsNullOrWhiteSpace(text)) return false;
 
             // Fast check if it contains the targets at all
-            if (text.IndexOf("SQ-FT", StringComparison.OrdinalIgnoreCase) < 0 && 
-                text.IndexOf("ACRES", StringComparison.OrdinalIgnoreCase) < 0 &&
-                text.IndexOf("SQ. FT.", StringComparison.OrdinalIgnoreCase) < 0)
+            if (text.IndexOf("SQ", StringComparison.OrdinalIgnoreCase) < 0 && 
+                text.IndexOf("ACRES", StringComparison.OrdinalIgnoreCase) < 0)
             {
                 return false;
             }
 
             // Check if it already has a plus-minus symbol somewhere
-            if (text.Contains("±") || 
-                text.IndexOf("%%p", StringComparison.OrdinalIgnoreCase) >= 0 || 
-                text.IndexOf("\\U+00B1", StringComparison.OrdinalIgnoreCase) >= 0)
+            bool hasSymbol = text.Contains("±") || 
+                             text.IndexOf("%%p", StringComparison.OrdinalIgnoreCase) >= 0 || 
+                             text.IndexOf("\\U+00B1", StringComparison.OrdinalIgnoreCase) >= 0;
+
+            bool changed = false;
+
+            // Replace instances of ACRES or SQ-FT with acronyms, and inject ± before them if missing
+            string replaced = Regex.Replace(text, @"\b(SQ\.?[- \s]*FT\.?|ACRES)(?!\w)", match =>
             {
-                return false;
-            }
+                changed = true;
+                string newValue;
+                string originalPattern = match.Value.ToUpper();
+                
+                if (originalPattern.Contains("ACRE"))
+                {
+                    newValue = "Ac";
+                }
+                else
+                {
+                    newValue = "SF";
+                }
 
-            // If not, inject ± before SQ-FT, SQ. FT. or ACRES
-            string replaced = Regex.Replace(text, @"\b(SQ-FT|ACRES|SQ\.?\s*FT\.?)\b", "± $1", RegexOptions.IgnoreCase);
+                // If no symbol exists anywhere in the text, we prepend ± 
+                if (!hasSymbol)
+                {
+                    newValue = "± " + newValue;
+                    hasSymbol = true; // prevent adding it twice if there are multiple matches
+                }
 
-            if (replaced != text)
+                return newValue;
+            }, RegexOptions.IgnoreCase);
+
+            if (changed && replaced != text)
             {
                 newText = replaced;
                 return true;
