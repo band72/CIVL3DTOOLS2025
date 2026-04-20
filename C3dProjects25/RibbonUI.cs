@@ -99,6 +99,7 @@ namespace RCS.C3D2025.Tools
                 // --- PANEL: Drafting ---
                 RibbonPanel draftPanel = CreatePanel(rcsTab, "Drafting");
                 AddRibbonButton(draftPanel.Source, "Blks To Layer0", "RCS_SET_ALL_BLOCKS_TO_LAYER0 ", btnIdx++);
+                AddRibbonButton(draftPanel.Source, "Cleanup Dwg",    "RCS_CLEANUP_DRAWING ",          btnIdx++);
                 AddRibbonButton(draftPanel.Source, "Convert Cogo",   "RCS_CONVERT_COGO_CODES ",       btnIdx++);
                 AddRibbonButton(draftPanel.Source, "Apply Template", "RCS_APPLY_TEMPLATE ",           btnIdx++);
                 AddRibbonButton(draftPanel.Source, "Capture OSM",    "RCS_CAPTURE_MEAS_OSM ",         btnIdx++);
