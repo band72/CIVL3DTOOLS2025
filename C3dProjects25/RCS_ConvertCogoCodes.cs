@@ -172,6 +172,11 @@ namespace RCS.C3D2025.Tools
         [CommandMethod("RCS_CONVERT_COGO_CODES")]
         public void RunConvertCogoCodes()
         {
+            ExecuteConvertCogoCodes(false);
+        }
+
+        public void ExecuteConvertCogoCodes(bool autoSelectAll)
+        {
             var doc = Application.DocumentManager.MdiActiveDocument;
             if (doc == null) return;
             var ed = doc.Editor;
@@ -183,26 +188,12 @@ namespace RCS.C3D2025.Tools
 
             try
             {
-                // 1. Select COGO points (or press Enter to select ALL)
-                PromptSelectionOptions pso = new PromptSelectionOptions
-                {
-                    MessageForAdding = "\nSelect COGO points to convert (Enter = ALL): ",
-                    AllowDuplicates = false
-                };
-                
+                SelectionSet ss = null;
                 TypedValue[] filterValues = { new TypedValue((int)DxfCode.Start, "AECC_COGO_POINT") };
                 SelectionFilter filter = new SelectionFilter(filterValues);
 
-                PromptSelectionResult psr = ed.GetSelection(pso, filter);
-
-                SelectionSet ss;
-                if (psr.Status == PromptStatus.OK)
+                if (autoSelectAll)
                 {
-                    ss = psr.Value;
-                }
-                else if (psr.Status == PromptStatus.Error)
-                {
-                    // User pressed Enter without selection -> Process ALL COGO points
                     PromptSelectionResult allPsr = ed.SelectAll(filter);
                     if (allPsr.Status != PromptStatus.OK)
                     {
@@ -213,8 +204,35 @@ namespace RCS.C3D2025.Tools
                 }
                 else
                 {
-                    // Cancelled or other
-                    return;
+                    // 1. Select COGO points (or press Enter to select ALL)
+                    PromptSelectionOptions pso = new PromptSelectionOptions
+                    {
+                        MessageForAdding = "\nSelect COGO points to convert (Enter = ALL): ",
+                        AllowDuplicates = false
+                    };
+                    
+                    PromptSelectionResult psr = ed.GetSelection(pso, filter);
+
+                    if (psr.Status == PromptStatus.OK)
+                    {
+                        ss = psr.Value;
+                    }
+                    else if (psr.Status == PromptStatus.Error)
+                    {
+                        // User pressed Enter without selection -> Process ALL COGO points
+                        PromptSelectionResult allPsr = ed.SelectAll(filter);
+                        if (allPsr.Status != PromptStatus.OK)
+                        {
+                            ed.WriteMessage("\nNo COGO points found.");
+                            return;
+                        }
+                        ss = allPsr.Value;
+                    }
+                    else
+                    {
+                        // Cancelled or other
+                        return;
+                    }
                 }
 
                 if (ss == null || ss.Count == 0)
