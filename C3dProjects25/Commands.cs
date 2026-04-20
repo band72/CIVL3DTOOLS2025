@@ -13,6 +13,7 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.RcsApplyTemplate))]
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.Tools.CaptureMeasOsmCommand))]
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.Tools.ConvertCogoCodesCommand))]
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.Tools.CleanupDrawingCommand))]
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.RcsDeleteAllPointStylesNet8))]
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.RCS_DescKeySet_ImpExp))]
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(RCS.C3D2025.RcsDiagPointStyleSetters))]
