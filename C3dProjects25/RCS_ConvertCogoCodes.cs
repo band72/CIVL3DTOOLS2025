@@ -315,6 +315,19 @@ namespace RCS.C3D2025.Tools
                                         // Sub-format LB suffix (e.g. 1/2LB1234 -> 1/2 \P LB-1234)
                                         text = System.Text.RegularExpressions.Regex.Replace(text, @"(\d+/\d+)\s*(LB)\s*(\d+)", "$1 \\P $2-$3", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                                         
+                                        // If there are multiple LB IDs, keep only the last one
+                                        string pattern = @"\s*\(?\bLB-?\d+\b\)?";
+                                        int lbCount = System.Text.RegularExpressions.Regex.Matches(text, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase).Count;
+                                        if (lbCount > 1)
+                                        {
+                                            int currentLb = 0;
+                                            text = System.Text.RegularExpressions.Regex.Replace(text, pattern, m => 
+                                            {
+                                                currentLb++;
+                                                return currentLb == lbCount ? m.Value : "";
+                                            }, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                                        }
+
                                         return text.Replace("  ", " ").Trim();
                                     };
 
