@@ -58,7 +58,8 @@ namespace C3dProjects25
                 int metaRows = 5; 
                 int headerRows = 2; // Title + Column Headers
                 int itemRows = items.Count;
-                int totalRows = metaRows + headerRows + itemRows;
+                int disclaimerRows = 1;
+                int totalRows = metaRows + headerRows + itemRows + disclaimerRows;
 
                 tbl.InsertRows(0, 1.5, totalRows);
                 tbl.InsertColumns(0, 20.0, 2);
@@ -99,6 +100,11 @@ namespace C3dProjects25
                     r++;
                 }
 
+                // Append Disclaimer Row
+                int disclaimerIndex = r;
+                tbl.Cells[disclaimerIndex, 0].TextString = "LIMITATION OF LIABILITY: In recognition of the relative risks and benefits of the project to both the Client and the Design Professional, the risks have been allocated such that the Client agrees, to the fullest extent permitted by law, to limit the liability of the Design Professional and his or her subconsultants to the Client and to all construction contractors and subcontractors on the project for any and all claims, losses, costs, damages of any nature whatsoever or claims expenses from any cause or causes, so that the total aggregate liability of the Design Professional and his or her subconsultants to all those named shall not exceed $1.00, or the Design Professional's total fee for services rendered on this project, whichever is greater. Such claims and causes include, but are not limited to negligence, professional errors or omissions, strict liability, breach of contract or warranty.";
+                tbl.MergeCells(CellRange.Create(tbl, disclaimerIndex, 0, disclaimerIndex, 1));
+
                 // Format Table
                 for (int i = 0; i < tbl.Rows.Count; i++)
                 {
@@ -117,11 +123,15 @@ namespace C3dProjects25
                 tbl.Cells[6, 0].TextHeight = 1.15;
                 tbl.Cells[6, 1].TextHeight = 1.15;
                 
-                for(int i = 7; i < totalRows; i++)
+                for(int i = 7; i < disclaimerIndex; i++)
                 {
                    tbl.Cells[i, 0].Alignment = CellAlignment.MiddleCenter; 
                 }
 
+                // Format Disclaimer explicitly
+                tbl.Cells[disclaimerIndex, 0].Alignment = CellAlignment.TopLeft;
+                tbl.Cells[disclaimerIndex, 0].TextHeight = 0.8; // Smaller text
+                
                 tbl.GenerateLayout();
                 btr.AppendEntity(tbl);
                 tr.AddNewlyCreatedDBObject(tbl, true);
