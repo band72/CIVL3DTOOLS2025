@@ -116,10 +116,10 @@ namespace RCS.C3D2025.Tools
                     newValue = "SF";
                 }
 
-                // If no symbol exists anywhere in the text, we prepend ± 
+                // If no symbol exists anywhere in the text, we prepend %%p 
                 if (!hasSymbol)
                 {
-                    newValue = "± " + newValue;
+                    newValue = "%%p " + newValue;
                     hasSymbol = true; // prevent adding it twice if there are multiple matches
                 }
 
