@@ -20,14 +20,11 @@ namespace RCS.C3D2025.Tools
 
             try
             {
-                // 1. Run ConvertCogoCodes automatically
-                ed.WriteMessage("\n--- Running Cleanup: Convert COGO Codes ---");
+                // 1. Run ConvertCogoCodes automatically and quietly
                 var convertCmd = new ConvertCogoCodesCommand();
-                convertCmd.ExecuteConvertCogoCodes(true); // true = autoSelectAll
+                convertCmd.ExecuteConvertCogoCodes(autoSelectAll: true, quiet: true); 
 
                 // 2. Search drawing for SQ-FT and ACRES to enforce +/- symbol
-                ed.WriteMessage("\n--- Running Cleanup: Verifying SQ-FT and ACRES symbols ---");
-
                 int updatedTextCount = 0;
 
                 using (Transaction tr = db.TransactionManager.StartTransaction())
@@ -73,7 +70,10 @@ namespace RCS.C3D2025.Tools
                     tr.Commit();
                 }
 
-                ed.WriteMessage($"\nCleanup complete. Drawing texts updated: {updatedTextCount}\n");
+                if (updatedTextCount > 0)
+                {
+                    ed.WriteMessage($"\nCleanup complete. Area texts formatted: {updatedTextCount}\n");
+                }
             }
             catch (System.Exception ex)
             {
@@ -129,11 +129,9 @@ namespace RCS.C3D2025.Tools
             if (changed && replaced != text)
             {
                 newText = replaced;
-                var doc = Application.DocumentManager.MdiActiveDocument;
-                if (doc != null)
-                {
-                    doc.Editor.WriteMessage($"\n  [CleanupText] '{text.Replace("\n", "\\n")}' --> '{newText.Replace("\n", "\\n")}'");
-                }
+                // Silenced diagnostic tracing
+                // var doc = Application.DocumentManager.MdiActiveDocument;
+                // if (doc != null) { doc.Editor.WriteMessage($"\n  [CleanupText] '{text.Replace("\n", "\\n")}' --> '{newText.Replace("\n", "\\n")}'"); }
                 return true;
             }
 

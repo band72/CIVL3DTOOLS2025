@@ -175,7 +175,7 @@ namespace RCS.C3D2025.Tools
             ExecuteConvertCogoCodes(false);
         }
 
-        public void ExecuteConvertCogoCodes(bool autoSelectAll)
+        public void ExecuteConvertCogoCodes(bool autoSelectAll, bool quiet = false)
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
             if (doc == null) return;
@@ -197,7 +197,7 @@ namespace RCS.C3D2025.Tools
                     PromptSelectionResult allPsr = ed.SelectAll(filter);
                     if (allPsr.Status != PromptStatus.OK)
                     {
-                        ed.WriteMessage("\nNo COGO points found.");
+                        if (!quiet) ed.WriteMessage("\nNo COGO points found.");
                         return;
                     }
                     ss = allPsr.Value;
@@ -223,7 +223,7 @@ namespace RCS.C3D2025.Tools
                         PromptSelectionResult allPsr = ed.SelectAll(filter);
                         if (allPsr.Status != PromptStatus.OK)
                         {
-                            ed.WriteMessage("\nNo COGO points found.");
+                            if (!quiet) ed.WriteMessage("\nNo COGO points found.");
                             return;
                         }
                         ss = allPsr.Value;
@@ -237,7 +237,7 @@ namespace RCS.C3D2025.Tools
 
                 if (ss == null || ss.Count == 0)
                 {
-                    ed.WriteMessage("\nNo COGO points selected.");
+                    if (!quiet) ed.WriteMessage("\nNo COGO points selected.");
                     return;
                 }
 
@@ -364,10 +364,13 @@ namespace RCS.C3D2025.Tools
                                 }
                                 else
                                 {
-                                    // Diagnostic: show exact bytes so invisible chars are visible
-                                    byte[] _diagBytes = System.Text.Encoding.UTF8.GetBytes(searchKey);
-                                    string hexDump = string.Join(" ", Array.ConvertAll(_diagBytes, b => b.ToString("X2")));
-                                    ed.WriteMessage($"\n  [NO-MATCH] pt#{point.PointNumber} raw=\"{searchKey}\" len={searchKey.Length} hex=[{hexDump}]");
+                                    if (!quiet)
+                                    {
+                                        // Diagnostic: show exact bytes so invisible chars are visible
+                                        byte[] _diagBytes = System.Text.Encoding.UTF8.GetBytes(searchKey);
+                                        string hexDump = string.Join(" ", Array.ConvertAll(_diagBytes, b => b.ToString("X2")));
+                                        ed.WriteMessage($"\n  [NO-MATCH] pt#{point.PointNumber} raw=\"{searchKey}\" len={searchKey.Length} hex=[{hexDump}]");
+                                    }
                                     cntSkip++;
                                 }
                             }
@@ -381,7 +384,7 @@ namespace RCS.C3D2025.Tools
                     tr.Commit();
                 }
 
-                ed.WriteMessage($"\nDone. Processed: {cntAll} | Converted: {cntHit} | No Match: {cntSkip}");
+                if (!quiet) ed.WriteMessage($"\nDone. Processed: {cntAll} | Converted: {cntHit} | No Match: {cntSkip}");
             }
             catch (System.Exception ex)
             {
