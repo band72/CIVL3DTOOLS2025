@@ -131,12 +131,24 @@ namespace C3dProjects25.Tables
         {
             public string ID;
             public string P_Bear, P_Dist, D_Bear, D_Dist, M_Bear, M_Dist;
-            public string RefType => (!string.IsNullOrEmpty(P_Bear) || !string.IsNullOrEmpty(P_Dist)) ? "P" : "D";
+            public string ExplicitRefTag;
+
+            public string RefType 
+            {
+                get 
+                {
+                    if (!string.IsNullOrEmpty(ExplicitRefTag)) return ExplicitRefTag;
+                    if (!string.IsNullOrEmpty(P_Bear) || !string.IsNullOrEmpty(P_Dist)) return "P";
+                    if (!string.IsNullOrEmpty(D_Bear) || !string.IsNullOrEmpty(D_Dist)) return "D";
+                    return "P";
+                }
+            }
             
             public void ApplyRefFallbacks()
             {
-                string rB = RefType == "P" ? P_Bear : D_Bear;
-                string rD = RefType == "P" ? P_Dist : D_Dist;
+                bool isRefD = (RefType == "D" || RefType == "R");
+                string rB = isRefD ? D_Bear : P_Bear;
+                string rD = isRefD ? D_Dist : P_Dist;
                 
                 // Copy missing from M
                 if (string.IsNullOrEmpty(rB)) rB = M_Bear;
@@ -146,8 +158,8 @@ namespace C3dProjects25.Tables
                 if (string.IsNullOrEmpty(M_Bear)) M_Bear = rB;
                 if (string.IsNullOrEmpty(M_Dist)) M_Dist = rD;
 
-                if (RefType == "P") { P_Bear = rB; P_Dist = rD; }
-                else { D_Bear = rB; D_Dist = rD; }
+                if (isRefD) { D_Bear = rB; D_Dist = rD; }
+                else { P_Bear = rB; P_Dist = rD; }
             }
         }
 
@@ -185,10 +197,21 @@ namespace C3dProjects25.Tables
                         string tag = GetTag(u);
                         string strip = StripTags(s);
 
-                        if (mode == "L" && curLine != null && Regex.IsMatch(u, @"[NS].*[EW]"))
+                        if (mode == "L" && curLine != null)
                         {
-                            var parts = ParseBearingDist(strip);
-                            ApplyLineData(curLine, tag, parts.bear, parts.dist);
+                            if (Regex.IsMatch(u, @"[NS].*[EW]"))
+                            {
+                                var parts = ParseBearingDist(strip);
+                                ApplyLineData(curLine, tag, parts.bear, parts.dist);
+                            }
+                            else if (Regex.IsMatch(strip, @"^[\d\.]+"))
+                            {
+                                ApplyLineData(curLine, tag, null, strip);
+                            }
+                            else if (!string.IsNullOrEmpty(tag))
+                            {
+                                ApplyLineData(curLine, tag, null, strip);
+                            }
                         }
                         else if (mode == "C" && curCurve != null)
                         {
@@ -210,13 +233,15 @@ namespace C3dProjects25.Tables
             {
                 if (u.Contains("(P&M)") || u.Contains("(P&A)") || u.Contains("(P & M)")) return "PM";
                 if (u.Contains("(D&M)") || u.Contains("(D&A)")) return "DM";
+                if (u.Contains("(R&M)") || u.Contains("(R&A)") || u.Contains("(R & M)")) return "RM";
                 if (u.Contains("(P)")) return "P";
                 if (u.Contains("(D)")) return "D";
+                if (u.Contains("(R)")) return "R";
                 if (u.Contains("(M)") || u.Contains("(A)")) return "M";
                 return "";
             }
 
-            string StripTags(string s) => Regex.Replace(s, @"\([PDMA& ]+\)", "", RegexOptions.IgnoreCase).Trim();
+            string StripTags(string s) => Regex.Replace(s, @"\([PDMAR& ]+\)", "", RegexOptions.IgnoreCase).Trim();
 
             (string bear, string dist) ParseBearingDist(string s)
             {
@@ -244,17 +269,45 @@ namespace C3dProjects25.Tables
 
             void ApplyLineData(LineRec r, string tag, string bear, string dist)
             {
-                if (tag == "PM") { r.P_Bear = bear; r.M_Bear = bear; r.P_Dist = dist; r.M_Dist = dist; }
-                else if (tag == "DM") { r.D_Bear = bear; r.M_Bear = bear; r.D_Dist = dist; r.M_Dist = dist; }
-                else if (tag == "P") { r.P_Bear = bear; r.P_Dist = dist; }
-                else if (tag == "D") { r.D_Bear = bear; r.D_Dist = dist; }
-                else if (tag == "M") { r.M_Bear = bear; r.M_Dist = dist; }
+                if (tag == "PM") { 
+                    if (string.IsNullOrEmpty(r.ExplicitRefTag)) r.ExplicitRefTag = "P";
+                    if (!string.IsNullOrEmpty(bear)) { r.P_Bear = bear; r.M_Bear = bear; }
+                    if (!string.IsNullOrEmpty(dist)) { r.P_Dist = dist; r.M_Dist = dist; }
+                }
+                else if (tag == "DM" || tag == "RM") { 
+                    if (string.IsNullOrEmpty(r.ExplicitRefTag)) r.ExplicitRefTag = tag == "DM" ? "D" : "R";
+                    if (!string.IsNullOrEmpty(bear)) { r.D_Bear = bear; r.M_Bear = bear; }
+                    if (!string.IsNullOrEmpty(dist)) { r.D_Dist = dist; r.M_Dist = dist; }
+                }
+                else if (tag == "P") { 
+                    if (string.IsNullOrEmpty(r.ExplicitRefTag)) r.ExplicitRefTag = "P";
+                    if (!string.IsNullOrEmpty(bear)) r.P_Bear = bear; 
+                    if (!string.IsNullOrEmpty(dist)) r.P_Dist = dist; 
+                }
+                else if (tag == "D" || tag == "R") { 
+                    if (string.IsNullOrEmpty(r.ExplicitRefTag)) r.ExplicitRefTag = tag;
+                    if (!string.IsNullOrEmpty(bear)) r.D_Bear = bear; 
+                    if (!string.IsNullOrEmpty(dist)) r.D_Dist = dist; 
+                }
+                else if (tag == "M") { 
+                    if (!string.IsNullOrEmpty(bear)) r.M_Bear = bear; 
+                    if (!string.IsNullOrEmpty(dist)) r.M_Dist = dist; 
+                }
+                else if (tag == "") {
+                    if (r.P_Bear == null && r.P_Dist == null && r.D_Bear == null && r.D_Dist == null) {
+                        if (!string.IsNullOrEmpty(bear)) r.P_Bear = bear;
+                        if (!string.IsNullOrEmpty(dist)) r.P_Dist = dist;
+                    } else if (r.M_Bear == null && r.M_Dist == null) {
+                        if (!string.IsNullOrEmpty(bear)) r.M_Bear = bear;
+                        if (!string.IsNullOrEmpty(dist)) r.M_Dist = dist;
+                    }
+                }
             }
 
             void ApplyCurveData(CurveRec r, string tag, string type, string val)
             {
-                bool isP = (tag == "PM" || tag == "P" || tag == "D" || tag == "DM");
-                bool isM = (tag == "PM" || tag == "M" || tag == "DM" || tag == "A");
+                bool isP = (tag == "PM" || tag == "P" || tag == "D" || tag == "R" || tag == "DM" || tag == "RM");
+                bool isM = (tag == "PM" || tag == "M" || tag == "DM" || tag == "RM" || tag == "A");
                 if (type == "R") { if (isP) r.P_Rad = val; if (isM) r.M_Rad = val; }
                 if (type == "L") { if (isP) r.P_Arc = val; if (isM) r.M_Arc = val; }
                 if (type == "D") { if (isP) r.P_Delta = val; if (isM) r.M_Delta = val; }
@@ -274,7 +327,7 @@ namespace C3dProjects25.Tables
             foreach (var l in lines)
             {
                 string u = l.ToUpper();
-                string clean = Regex.Replace(l, @"\([PDMA& ]+\)", "", RegexOptions.IgnoreCase).Trim();
+                string clean = Regex.Replace(l, @"\([PDMAR& ]+\)", "", RegexOptions.IgnoreCase).Trim();
 
                 if (u.Contains("R=") || u.Contains("R ="))
                 {
@@ -292,7 +345,7 @@ namespace C3dProjects25.Tables
                 }
                 else if (Regex.IsMatch(u, @"[NS].*[EW]"))
                 {
-                    bool isP = u.Contains("(P)") || u.Contains("(D)"); 
+                    bool isP = u.Contains("(P)") || u.Contains("(D)") || u.Contains("(R)"); 
                     bool isM = u.Contains("(M)") || u.Contains("(A)");
                     var parts = ParseBearingDist(clean);
                     if (isP) { CB_p = parts.bear; CD_p = parts.dist; }
@@ -306,7 +359,7 @@ namespace C3dProjects25.Tables
             string Tp = rad.HasValue && dP.HasValue ? (rad.Value * Math.Tan(dP.Value * Math.PI / 360.0)).ToString("F2") : "";
             string Tm = rad.HasValue && dM.HasValue ? (rad.Value * Math.Tan(dM.Value * Math.PI / 360.0)).ToString("F2") : "";
 
-            string rTag = text.ToUpper().Contains("(D)") ? "D" : "P";
+            string rTag = text.ToUpper().Contains("(D)") ? "D" : text.ToUpper().Contains("(R)") ? "R" : "P";
             string mTag = text.ToUpper().Contains("(A)") ? "A" : "M";
 
             return new CurveRecV24
@@ -325,18 +378,24 @@ namespace C3dProjects25.Tables
         {
             int pPos = val.IndexOf("(P)", StringComparison.OrdinalIgnoreCase);
             if (pPos < 0) pPos = val.IndexOf("(D)", StringComparison.OrdinalIgnoreCase);
+            if (pPos < 0) pPos = val.IndexOf("(R)", StringComparison.OrdinalIgnoreCase);
             
             int mPos = val.IndexOf("(M)", StringComparison.OrdinalIgnoreCase);
             if (mPos < 0) mPos = val.IndexOf("(A)", StringComparison.OrdinalIgnoreCase);
 
             if (pPos >= 0 && mPos >= 0)
             {
-                pVal = val.Substring(0, pPos).Trim();
-                mVal = val.Substring(pPos + 3, mPos - (pPos + 3)).Trim();
+                if (pPos < mPos) {
+                    pVal = val.Substring(0, pPos).Trim();
+                    mVal = val.Substring(pPos + 3, mPos - (pPos + 3)).Trim();
+                } else {
+                    mVal = val.Substring(0, mPos).Trim();
+                    pVal = val.Substring(mPos + 3, pPos - (mPos + 3)).Trim();
+                }
             }
             else
             {
-                pVal = Regex.Replace(val, @"\([PDMA]\)", "", RegexOptions.IgnoreCase).Trim();
+                pVal = Regex.Replace(val, @"\([PDMAR]\)", "", RegexOptions.IgnoreCase).Trim();
                 mVal = "";
             }
         }
@@ -408,9 +467,10 @@ namespace C3dProjects25.Tables
             foreach (var l in recs)
             {
                 l.ApplyRefFallbacks();
+                bool isRefD = (l.RefType == "D" || l.RefType == "R");
                 tbl.Cells[r, 0].TextString = l.ID ?? ""; tbl.Cells[r, 1].TextString = l.RefType ?? "";
-                tbl.Cells[r, 2].TextString = (l.RefType == "P" ? l.P_Bear : l.D_Bear) ?? "";
-                tbl.Cells[r, 3].TextString = (l.RefType == "P" ? l.P_Dist : l.D_Dist) ?? "";
+                tbl.Cells[r, 2].TextString = (isRefD ? l.D_Bear : l.P_Bear) ?? "";
+                tbl.Cells[r, 3].TextString = (isRefD ? l.D_Dist : l.P_Dist) ?? "";
                 r++;
                 tbl.Cells[r, 0].TextString = l.ID ?? ""; tbl.Cells[r, 1].TextString = "A";
                 tbl.Cells[r, 2].TextString = l.M_Bear ?? ""; tbl.Cells[r, 3].TextString = l.M_Dist ?? "";
