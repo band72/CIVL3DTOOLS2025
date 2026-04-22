@@ -68,49 +68,49 @@ namespace RCS.C3D2025.Tools
 
                 // --- PANEL: QA Tools ---
                 RibbonPanel qaPanel = CreatePanel(rcsTab, "QA Tools");
-                AddRibbonButton(qaPanel.Source, "Run QA",         "RCS_QA_RUN ",            "qa_icon.png");
-                AddRibbonButton(qaPanel.Source, "Tagger",         "RCS_QA_TAGGER ",         "qa_icon.png");
-                AddRibbonButton(qaPanel.Source, "Auto Tag",       "RCS_QA_AUTOTAG ",        "qa_icon.png");
-                AddRibbonButton(qaPanel.Source, "Auto Type",      "RCS_QA_AUTOTYPE ",       "qa_icon.png");
-                AddRibbonButton(qaPanel.Source, "Fix Duplicates", "RCS_QA_FIX_DUPLICATES ", "qa_icon.png");
+                AddRibbonButton(qaPanel.Source, "Run QA",         "RCS_QA_RUN ",            "qa_run_icon.png");
+                AddRibbonButton(qaPanel.Source, "Tagger",         "RCS_QA_TAGGER ",         "qa_tagger_icon.png");
+                AddRibbonButton(qaPanel.Source, "Auto Tag",       "RCS_QA_AUTOTAG ",        "qa_autotag_icon.png");
+                AddRibbonButton(qaPanel.Source, "Auto Type",      "RCS_QA_AUTOTYPE ",       "qa_autotype_icon.png");
+                AddRibbonButton(qaPanel.Source, "Fix Duplicates", "RCS_QA_FIX_DUPLICATES ", "qa_fixdupes_icon.png");
 
                 // --- PANEL: Point Styles ---
                 RibbonPanel stylesPanel = CreatePanel(rcsTab, "Point Styles");
-                AddRibbonButton(stylesPanel.Source, "Export Styles",    "RCS_EXPORT_POINTSTYLES_CSV ",              "styles_icon.png");
-                AddRibbonButton(stylesPanel.Source, "Import Styles",    "RCS_IMPORT_POINTSTYLES_V4 ",               "styles_icon.png");
-                AddRibbonButton(stylesPanel.Source, "Delete Styles",    "RCS_DELETE_POINTSTYLES_FROM_CSV ",         "styles_icon.png");
-                AddRibbonButton(stylesPanel.Source, "Delete All",       "RCS_DELETE_ALL_POINTSTYLES ",              "styles_icon.png");
-                AddRibbonButton(stylesPanel.Source, "Force ByLayer",    "RCS_FORCE_POINTSTYLE_ALL_VIEWS_BYLAYER ",  "styles_icon.png");
-                AddRibbonButton(stylesPanel.Source, "Apply Desc Layers","RCS_APPLY_DESCKEY_LAYERS_TO_POINTSTYLES ", "styles_icon.png");
+                AddRibbonButton(stylesPanel.Source, "Export Styles",    "RCS_EXPORT_POINTSTYLES_CSV ",              "styles_export_icon.png");
+                AddRibbonButton(stylesPanel.Source, "Import Styles",    "RCS_IMPORT_POINTSTYLES_V4 ",               "styles_import_icon.png");
+                AddRibbonButton(stylesPanel.Source, "Delete Styles",    "RCS_DELETE_POINTSTYLES_FROM_CSV ",         "styles_delete_icon.png");
+                AddRibbonButton(stylesPanel.Source, "Delete All",       "RCS_DELETE_ALL_POINTSTYLES ",              "styles_deleteall_icon.png");
+                AddRibbonButton(stylesPanel.Source, "Force ByLayer",    "RCS_FORCE_POINTSTYLE_ALL_VIEWS_BYLAYER ",  "styles_forcebylayer_icon.png");
+                AddRibbonButton(stylesPanel.Source, "Apply Desc Layers","RCS_APPLY_DESCKEY_LAYERS_TO_POINTSTYLES ", "styles_applylayers_icon.png");
 
                 // --- PANEL: Desc Keys ---
                 RibbonPanel descPanel = CreatePanel(rcsTab, "Desc Keys");
-                AddRibbonButton(descPanel.Source, "Export DescKeys", "RCS_EXPORT_DESCKEY_CODE_BLOCKS ", "keys_icon.png");
-                AddRibbonButton(descPanel.Source, "Import DescKeys", "RCS_IMPORT_DESC_KEYSETSV2 ",      "keys_icon.png");
-                AddRibbonButton(descPanel.Source, "Fix Scale",       "RCS_FIX_DESC_KEY_SCALE ",         "keys_icon.png");
+                AddRibbonButton(descPanel.Source, "Export DescKeys", "RCS_EXPORT_DESCKEY_CODE_BLOCKS ", "keys_export_icon.png");
+                AddRibbonButton(descPanel.Source, "Import DescKeys", "RCS_IMPORT_DESC_KEYSETSV2 ",      "keys_import_icon.png");
+                AddRibbonButton(descPanel.Source, "Fix Scale",       "RCS_FIX_DESC_KEY_SCALE ",         "keys_fixscale_icon.png");
 
                 // --- PANEL: Tables & Symbols ---
                 RibbonPanel tablePanel = CreatePanel(rcsTab, "Tables & Symbols");
-                AddRibbonButton(tablePanel.Source, "Symbol Table",   "RCS_CreateSymbolTableRobust ",            "table_icon.png");
-                AddRibbonButton(tablePanel.Source, "Line/Curve Tbl", "RCS_TABLES_FROM_WINDOW ",                 "table_icon.png");
-                AddRibbonButton(tablePanel.Source, "Curve Table",    "RCS_BUILD_CURVE_TABLE ",                  "table_icon.png");
-                AddRibbonButton(tablePanel.Source, "Match Markers",  "RCS_MATCH_POINTSTYLE_BLOCK_MARKERS_NET ", "styles_icon.png");
+                AddRibbonButton(tablePanel.Source, "Symbol Table",   "RCS_CreateSymbolTableRobust ",            "table_symbol_icon.png");
+                AddRibbonButton(tablePanel.Source, "Line/Curve Tbl", "RCS_TABLES_FROM_WINDOW ",                 "table_linecurve_icon.png");
+                AddRibbonButton(tablePanel.Source, "Curve Table",    "RCS_BUILD_CURVE_TABLE ",                  "table_curve_icon.png");
+                AddRibbonButton(tablePanel.Source, "Match Markers",  "RCS_MATCH_POINTSTYLE_BLOCK_MARKERS_NET ", "table_match_icon.png");
 
                 // --- PANEL: Drafting ---
                 RibbonPanel draftPanel = CreatePanel(rcsTab, "Drafting");
-                AddRibbonButton(draftPanel.Source, "Blks To Layer0", "RCS_SET_ALL_BLOCKS_TO_LAYER0 ", "drafting_icon.png");
-                AddRibbonButton(draftPanel.Source, "Cleanup Dwg",    "RCS_CLEANUP_DRAWING ",          "drafting_icon.png");
-                AddRibbonButton(draftPanel.Source, "Convert Cogo",   "RCS_CONVERT_COGO_CODES ",       "drafting_icon.png");
-                AddRibbonButton(draftPanel.Source, "Apply Template", "RCS_APPLY_TEMPLATE ",           "drafting_icon.png");
-                AddRibbonButton(draftPanel.Source, "Capture OSM",    "RCS_CAPTURE_MEAS_OSM ",         "drafting_icon.png");
-                AddRibbonButton(draftPanel.Source, "Export COGO",    "RCS_EXPORT_COGO_POINTS ",       "drafting_icon.png");
-                AddRibbonButton(draftPanel.Source, "ArcLeader",      "RCS_ARCLEADER ",                "drafting_icon.png");
-                AddRibbonButton(draftPanel.Source, "ArcLeader V2",   "RCS_ARCLEADER_V2 ",             "drafting_icon.png");
-                AddRibbonButton(draftPanel.Source, "Text Size",      "RCS_ARCLEADER_TEXTSIZE ",       "drafting_icon.png");
-                AddRibbonButton(draftPanel.Source, "Set FL CRS",     "RCS_SET_FL83EF ",               "drafting_icon.png");
-                AddRibbonButton(draftPanel.Source, "Print Sheets",   "RCS_PRINT_MULTI_SHEETS ",       "drafting_icon.png");
-                AddRibbonButton(draftPanel.Source, "Localize",       "RCS_LOCALIZE ",                 "drafting_icon.png");
-                AddRibbonButton(draftPanel.Source, "CAD Checklist",  "RCS_DRAW_CHECKLIST ",           "qa_icon.png");
+                AddRibbonButton(draftPanel.Source, "Blks To Layer0", "RCS_SET_ALL_BLOCKS_TO_LAYER0 ", "draft_layer0_icon.png");
+                AddRibbonButton(draftPanel.Source, "Cleanup Dwg",    "RCS_CLEANUP_DRAWING ",          "draft_cleanup_icon.png");
+                AddRibbonButton(draftPanel.Source, "Convert Cogo",   "RCS_CONVERT_COGO_CODES ",       "draft_convert_icon.png");
+                AddRibbonButton(draftPanel.Source, "Apply Template", "RCS_APPLY_TEMPLATE ",           "draft_template_icon.png");
+                AddRibbonButton(draftPanel.Source, "Capture OSM",    "RCS_CAPTURE_MEAS_OSM ",         "draft_osm_icon.png");
+                AddRibbonButton(draftPanel.Source, "Export COGO",    "RCS_EXPORT_COGO_POINTS ",       "draft_export_icon.png");
+                AddRibbonButton(draftPanel.Source, "ArcLeader",      "RCS_ARCLEADER ",                "draft_arcleader_icon.png");
+                AddRibbonButton(draftPanel.Source, "ArcLeader V2",   "RCS_ARCLEADER_V2 ",             "draft_arcleader2_icon.png");
+                AddRibbonButton(draftPanel.Source, "Text Size",      "RCS_ARCLEADER_TEXTSIZE ",       "draft_textsize_icon.png");
+                AddRibbonButton(draftPanel.Source, "Set FL CRS",     "RCS_SET_FL83EF ",               "draft_crs_icon.png");
+                AddRibbonButton(draftPanel.Source, "Print Sheets",   "RCS_PRINT_MULTI_SHEETS ",       "draft_print_icon.png");
+                AddRibbonButton(draftPanel.Source, "Localize",       "RCS_LOCALIZE ",                 "draft_localize_icon.png");
+                AddRibbonButton(draftPanel.Source, "CAD Checklist",  "RCS_DRAW_CHECKLIST ",           "qa_checklist_icon.png");
 
 
                 // --- PANEL: Help ---

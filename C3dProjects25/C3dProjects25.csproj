@@ -13,11 +13,37 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\qa_icon.png" />
-    <Resource Include="Resources\styles_icon.png" />
-    <Resource Include="Resources\keys_icon.png" />
-    <Resource Include="Resources\table_icon.png" />
-    <Resource Include="Resources\drafting_icon.png" />
+    <Resource Include="Resources\qa_run_icon.png" />
+    <Resource Include="Resources\qa_tagger_icon.png" />
+    <Resource Include="Resources\qa_autotag_icon.png" />
+    <Resource Include="Resources\qa_autotype_icon.png" />
+    <Resource Include="Resources\qa_fixdupes_icon.png" />
+    <Resource Include="Resources\styles_export_icon.png" />
+    <Resource Include="Resources\styles_import_icon.png" />
+    <Resource Include="Resources\styles_delete_icon.png" />
+    <Resource Include="Resources\styles_deleteall_icon.png" />
+    <Resource Include="Resources\styles_forcebylayer_icon.png" />
+    <Resource Include="Resources\styles_applylayers_icon.png" />
+    <Resource Include="Resources\keys_export_icon.png" />
+    <Resource Include="Resources\keys_import_icon.png" />
+    <Resource Include="Resources\keys_fixscale_icon.png" />
+    <Resource Include="Resources\table_symbol_icon.png" />
+    <Resource Include="Resources\table_linecurve_icon.png" />
+    <Resource Include="Resources\table_curve_icon.png" />
+    <Resource Include="Resources\table_match_icon.png" />
+    <Resource Include="Resources\draft_layer0_icon.png" />
+    <Resource Include="Resources\draft_cleanup_icon.png" />
+    <Resource Include="Resources\draft_convert_icon.png" />
+    <Resource Include="Resources\draft_template_icon.png" />
+    <Resource Include="Resources\draft_osm_icon.png" />
+    <Resource Include="Resources\draft_export_icon.png" />
+    <Resource Include="Resources\draft_arcleader_icon.png" />
+    <Resource Include="Resources\draft_arcleader2_icon.png" />
+    <Resource Include="Resources\draft_textsize_icon.png" />
+    <Resource Include="Resources\draft_crs_icon.png" />
+    <Resource Include="Resources\draft_print_icon.png" />
+    <Resource Include="Resources\draft_localize_icon.png" />
+    <Resource Include="Resources\qa_checklist_icon.png" />
     <Resource Include="Resources\help_icon.png" />
   </ItemGroup>
 
