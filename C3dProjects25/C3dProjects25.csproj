@@ -13,6 +13,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\qa_icon.png" />
+    <Resource Include="Resources\styles_icon.png" />
+    <Resource Include="Resources\keys_icon.png" />
+    <Resource Include="Resources\table_icon.png" />
+    <Resource Include="Resources\drafting_icon.png" />
+    <Resource Include="Resources\help_icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="RcsPointStyleLayerSync.cs" />
     <Compile Remove="RcsPointStyleLayerSyncv2.cs" />
     <Compile Remove="RcsPointStyleLayerSyncv3.cs" />

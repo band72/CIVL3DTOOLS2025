@@ -64,58 +64,58 @@ namespace RCS.C3D2025.Tools
                     ribbon.Tabs.Add(rcsTab);
                 }
 
-                int btnIdx = 1;
+                // No longer tracking button index as numbers
 
                 // --- PANEL: QA Tools ---
                 RibbonPanel qaPanel = CreatePanel(rcsTab, "QA Tools");
-                AddRibbonButton(qaPanel.Source, "Run QA",         "RCS_QA_RUN ",            btnIdx++);
-                AddRibbonButton(qaPanel.Source, "Tagger",         "RCS_QA_TAGGER ",         btnIdx++);
-                AddRibbonButton(qaPanel.Source, "Auto Tag",       "RCS_QA_AUTOTAG ",        btnIdx++);
-                AddRibbonButton(qaPanel.Source, "Auto Type",      "RCS_QA_AUTOTYPE ",       btnIdx++);
-                AddRibbonButton(qaPanel.Source, "Fix Duplicates", "RCS_QA_FIX_DUPLICATES ", btnIdx++);
+                AddRibbonButton(qaPanel.Source, "Run QA",         "RCS_QA_RUN ",            "qa_icon.png");
+                AddRibbonButton(qaPanel.Source, "Tagger",         "RCS_QA_TAGGER ",         "qa_icon.png");
+                AddRibbonButton(qaPanel.Source, "Auto Tag",       "RCS_QA_AUTOTAG ",        "qa_icon.png");
+                AddRibbonButton(qaPanel.Source, "Auto Type",      "RCS_QA_AUTOTYPE ",       "qa_icon.png");
+                AddRibbonButton(qaPanel.Source, "Fix Duplicates", "RCS_QA_FIX_DUPLICATES ", "qa_icon.png");
 
                 // --- PANEL: Point Styles ---
                 RibbonPanel stylesPanel = CreatePanel(rcsTab, "Point Styles");
-                AddRibbonButton(stylesPanel.Source, "Export Styles",    "RCS_EXPORT_POINTSTYLES_CSV ",              btnIdx++);
-                AddRibbonButton(stylesPanel.Source, "Import Styles",    "RCS_IMPORT_POINTSTYLES_V4 ",               btnIdx++);
-                AddRibbonButton(stylesPanel.Source, "Delete Styles",    "RCS_DELETE_POINTSTYLES_FROM_CSV ",         btnIdx++);
-                AddRibbonButton(stylesPanel.Source, "Delete All",       "RCS_DELETE_ALL_POINTSTYLES ",              btnIdx++);
-                AddRibbonButton(stylesPanel.Source, "Force ByLayer",    "RCS_FORCE_POINTSTYLE_ALL_VIEWS_BYLAYER ",  btnIdx++);
-                AddRibbonButton(stylesPanel.Source, "Apply Desc Layers","RCS_APPLY_DESCKEY_LAYERS_TO_POINTSTYLES ", btnIdx++);
+                AddRibbonButton(stylesPanel.Source, "Export Styles",    "RCS_EXPORT_POINTSTYLES_CSV ",              "styles_icon.png");
+                AddRibbonButton(stylesPanel.Source, "Import Styles",    "RCS_IMPORT_POINTSTYLES_V4 ",               "styles_icon.png");
+                AddRibbonButton(stylesPanel.Source, "Delete Styles",    "RCS_DELETE_POINTSTYLES_FROM_CSV ",         "styles_icon.png");
+                AddRibbonButton(stylesPanel.Source, "Delete All",       "RCS_DELETE_ALL_POINTSTYLES ",              "styles_icon.png");
+                AddRibbonButton(stylesPanel.Source, "Force ByLayer",    "RCS_FORCE_POINTSTYLE_ALL_VIEWS_BYLAYER ",  "styles_icon.png");
+                AddRibbonButton(stylesPanel.Source, "Apply Desc Layers","RCS_APPLY_DESCKEY_LAYERS_TO_POINTSTYLES ", "styles_icon.png");
 
                 // --- PANEL: Desc Keys ---
                 RibbonPanel descPanel = CreatePanel(rcsTab, "Desc Keys");
-                AddRibbonButton(descPanel.Source, "Export DescKeys", "RCS_EXPORT_DESCKEY_CODE_BLOCKS ", btnIdx++);
-                AddRibbonButton(descPanel.Source, "Import DescKeys", "RCS_IMPORT_DESC_KEYSETSV2 ",     btnIdx++);
-                AddRibbonButton(descPanel.Source, "Fix Scale",       "RCS_FIX_DESC_KEY_SCALE ",        btnIdx++);
+                AddRibbonButton(descPanel.Source, "Export DescKeys", "RCS_EXPORT_DESCKEY_CODE_BLOCKS ", "keys_icon.png");
+                AddRibbonButton(descPanel.Source, "Import DescKeys", "RCS_IMPORT_DESC_KEYSETSV2 ",      "keys_icon.png");
+                AddRibbonButton(descPanel.Source, "Fix Scale",       "RCS_FIX_DESC_KEY_SCALE ",         "keys_icon.png");
 
                 // --- PANEL: Tables & Symbols ---
                 RibbonPanel tablePanel = CreatePanel(rcsTab, "Tables & Symbols");
-                AddRibbonButton(tablePanel.Source, "Symbol Table",   "RCS_CreateSymbolTableRobust ",           btnIdx++);
-                AddRibbonButton(tablePanel.Source, "Line/Curve Tbl", "RCS_TABLES_FROM_WINDOW ",                btnIdx++);
-                AddRibbonButton(tablePanel.Source, "Curve Table",    "RCS_BUILD_CURVE_TABLE ",                 btnIdx++);
-                AddRibbonButton(tablePanel.Source, "Match Markers",  "RCS_MATCH_POINTSTYLE_BLOCK_MARKERS_NET ",btnIdx++);
+                AddRibbonButton(tablePanel.Source, "Symbol Table",   "RCS_CreateSymbolTableRobust ",            "table_icon.png");
+                AddRibbonButton(tablePanel.Source, "Line/Curve Tbl", "RCS_TABLES_FROM_WINDOW ",                 "table_icon.png");
+                AddRibbonButton(tablePanel.Source, "Curve Table",    "RCS_BUILD_CURVE_TABLE ",                  "table_icon.png");
+                AddRibbonButton(tablePanel.Source, "Match Markers",  "RCS_MATCH_POINTSTYLE_BLOCK_MARKERS_NET ", "styles_icon.png");
 
                 // --- PANEL: Drafting ---
                 RibbonPanel draftPanel = CreatePanel(rcsTab, "Drafting");
-                AddRibbonButton(draftPanel.Source, "Blks To Layer0", "RCS_SET_ALL_BLOCKS_TO_LAYER0 ", btnIdx++);
-                AddRibbonButton(draftPanel.Source, "Cleanup Dwg",    "RCS_CLEANUP_DRAWING ",          btnIdx++);
-                AddRibbonButton(draftPanel.Source, "Convert Cogo",   "RCS_CONVERT_COGO_CODES ",       btnIdx++);
-                AddRibbonButton(draftPanel.Source, "Apply Template", "RCS_APPLY_TEMPLATE ",           btnIdx++);
-                AddRibbonButton(draftPanel.Source, "Capture OSM",    "RCS_CAPTURE_MEAS_OSM ",         btnIdx++);
-                AddRibbonButton(draftPanel.Source, "Export COGO",    "RCS_EXPORT_COGO_POINTS ",       btnIdx++);
-                AddRibbonButton(draftPanel.Source, "ArcLeader",      "RCS_ARCLEADER ",                btnIdx++);
-                AddRibbonButton(draftPanel.Source, "ArcLeader V2",   "RCS_ARCLEADER_V2 ",             btnIdx++);
-                AddRibbonButton(draftPanel.Source, "Text Size",      "RCS_ARCLEADER_TEXTSIZE ",       btnIdx++);
-                AddRibbonButton(draftPanel.Source, "Set FL CRS",     "RCS_SET_FL83EF ",               btnIdx++);
-                AddRibbonButton(draftPanel.Source, "Print Sheets",   "RCS_PRINT_MULTI_SHEETS ",       btnIdx++);
-                AddRibbonButton(draftPanel.Source, "Localize",       "RCS_LOCALIZE ",                 29);
-                AddRibbonButton(draftPanel.Source, "CAD Checklist",  "RCS_DRAW_CHECKLIST ",           30);
+                AddRibbonButton(draftPanel.Source, "Blks To Layer0", "RCS_SET_ALL_BLOCKS_TO_LAYER0 ", "drafting_icon.png");
+                AddRibbonButton(draftPanel.Source, "Cleanup Dwg",    "RCS_CLEANUP_DRAWING ",          "drafting_icon.png");
+                AddRibbonButton(draftPanel.Source, "Convert Cogo",   "RCS_CONVERT_COGO_CODES ",       "drafting_icon.png");
+                AddRibbonButton(draftPanel.Source, "Apply Template", "RCS_APPLY_TEMPLATE ",           "drafting_icon.png");
+                AddRibbonButton(draftPanel.Source, "Capture OSM",    "RCS_CAPTURE_MEAS_OSM ",         "drafting_icon.png");
+                AddRibbonButton(draftPanel.Source, "Export COGO",    "RCS_EXPORT_COGO_POINTS ",       "drafting_icon.png");
+                AddRibbonButton(draftPanel.Source, "ArcLeader",      "RCS_ARCLEADER ",                "drafting_icon.png");
+                AddRibbonButton(draftPanel.Source, "ArcLeader V2",   "RCS_ARCLEADER_V2 ",             "drafting_icon.png");
+                AddRibbonButton(draftPanel.Source, "Text Size",      "RCS_ARCLEADER_TEXTSIZE ",       "drafting_icon.png");
+                AddRibbonButton(draftPanel.Source, "Set FL CRS",     "RCS_SET_FL83EF ",               "drafting_icon.png");
+                AddRibbonButton(draftPanel.Source, "Print Sheets",   "RCS_PRINT_MULTI_SHEETS ",       "drafting_icon.png");
+                AddRibbonButton(draftPanel.Source, "Localize",       "RCS_LOCALIZE ",                 "drafting_icon.png");
+                AddRibbonButton(draftPanel.Source, "CAD Checklist",  "RCS_DRAW_CHECKLIST ",           "qa_icon.png");
 
 
                 // --- PANEL: Help ---
                 RibbonPanel helpPanel = CreatePanel(rcsTab, "Help");
-                AddRibbonButton(helpPanel.Source, "Help Guide",      "RCS_HELP ",                     31);
+                AddRibbonButton(helpPanel.Source, "Help Guide",      "RCS_HELP ",                     "help_icon.png");
 
                 _isLoaded = true;
             }
@@ -179,7 +179,7 @@ namespace RCS.C3D2025.Tools
             return bitmap;
         }
 
-        private static void AddRibbonButton(RibbonPanelSource panelSrc, string text, string commandName, int number)
+        private static void AddRibbonButton(RibbonPanelSource panelSrc, string text, string commandName, string iconName)
         {
             RibbonButton btn = new RibbonButton();
             // Automatically break at first space for Ribbon stacking
@@ -192,9 +192,19 @@ namespace RCS.C3D2025.Tools
             btn.ShowText = true;
             btn.ShowImage = true; 
             
-            // Assign generated bitmaps for the button numbers
-            btn.Image = CreateTextBitmap(number.ToString(), 16);
-            btn.LargeImage = CreateTextBitmap(number.ToString(), 32);
+            try 
+            {
+                var uri = new Uri($"pack://application:,,,/C3dProjects25_v8;component/Resources/{iconName}", UriKind.Absolute);
+                btn.Image = new BitmapImage(uri);
+                btn.LargeImage = new BitmapImage(uri);
+            } 
+            catch 
+            {
+                // Fallback to text bitmap if image load fails
+                string initial = text.Length > 0 ? text.Substring(0, 1) : "?";
+                btn.Image = CreateTextBitmap(initial, 16);
+                btn.LargeImage = CreateTextBitmap(initial, 32);
+            }
 
             btn.CommandParameter = commandName;
             btn.CommandHandler = new RibbonCommandHandler();
